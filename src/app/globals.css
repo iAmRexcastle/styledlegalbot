@@ -16,32 +16,24 @@
 }
 
 @keyframes gradient-change {
+  from {
+    --color-1: hsl(98, 100%, 62%);
+    --color-2: hsl(204, 100%, 59%);
+  }
   to {
     --color-1: hsl(210, 100%, 59%);
     --color-2: hsl(310, 100%, 59%);
   }
 }
 
-/* Animated gradient text effect for headline */
+/* Headline gradient effect */
 .animated-gradient-headline {
   animation: gradient-change 5s linear infinite alternate;
   background: linear-gradient(to right, var(--color-1), var(--color-2));
-  background-clip: text;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-}
-
-/* Animated gradient text effect for subhead (if desired, currently applied to headline only) */
-.animated-gradient-subhead {
-  /* Uncomment if you want a gradient on the subhead:
-  animation: gradient-change 5s linear infinite alternate;
-  background: linear-gradient(to right, var(--color-1), var(--color-2));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  */
 }
 
 /* --- Custom Fonts --- */
@@ -86,29 +78,26 @@
   /* Attorney Advertisement */
   .attorney-ad {
     margin-top: 0;
-    padding-bottom: 1.5rem; /* ~10% padding might be too much on small devices—use rem for consistency */
-    font-size: 0.875rem; /* ~14px */
     text-align: center;
     color: var(--attorney-text-color);
   }
 
-  /* Animated Headline */
+  /* Headline */
   .animated-headline {
     font-family: var(--headline-font);
     font-size: 2.5rem;
-    line-height: 3.2rem;
+    line-height: 3rem; /* More comfortable spacing for multi-line headlines */
     letter-spacing: 0.12rem;
-    text-align: center;
     margin: 0 auto;
   }
 
-  /* Animated Subhead */
+  /* Subhead with improved line-height */
   .animated-subhead {
     font-family: var(--subhead-font);
-    font-size: 1.67rem;
+    font-size: 1.5rem;
+    line-height: 1.4; /* Increased line-height for better readability */
+    margin: 1.5rem 0;
     text-align: center;
-    margin: 2.5rem 0;  /* 2.5% top and bottom (using rem for consistency) */
-    line-height: 1rem;
   }
 
   /* Emoji Paragraph */
@@ -127,7 +116,7 @@
   }
 }
 
-/* --- Animated Gradient Background --- */
+/* --- Utilities & Animations --- */
 @layer utilities {
   .gradient-background {
     background: linear-gradient(163deg, #070017, #1e0861, #17102d, #4b008e);
@@ -135,19 +124,91 @@
     animation: gradient-animation 8s ease infinite;
     min-height: 100vh;
   }
-  
   @keyframes gradient-animation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-down {
+    animation: fadeDown 1s ease-out forwards;
+  }
+  .animate-delay-1000 {
+    animation-delay: 1s;
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .animate-fade-out {
+    animation: fadeOut 2.5s ease-in-out forwards;
+  }
+  .animate-fade-in {
+    animation: fadeIn 2s ease-linear forwards;
+  }
+
+  /* Container padding for responsiveness */
+  .container {
+    padding: 14px; /* Mobile */
+  }
+  @media (min-width: 600px) {
+    .container {
+      padding: 20px; /* Tablet */
+    }
+  }
+  @media (min-width: 900px) {
+    .container {
+      padding: 24px; /* Desktop */
+    }
+  }
+
+  /* New additions for neon and pulsing effects */
+  @keyframes logoPulse {
+    0% {
+      transform: scale(1);
+      filter: drop-shadow(0 0 4px rgba(0, 255, 198, 0.4));
+    }
+    50% {
+      transform: scale(1.06);
+      filter: drop-shadow(0 0 10px rgba(0, 255, 198, 0.7));
+    }
+    100% {
+      transform: scale(1);
+      filter: drop-shadow(0 0 4px rgba(0, 255, 198, 0.4));
+    }
+  }
+
+  .logo-pulse {
+    animation: logoPulse 2.5s ease-in-out infinite;
+  }
+
+  .neon-logo-container {
+    /* Bigger glow around the entire container */
+    filter: drop-shadow(0 0 8px rgba(0, 255, 198, 0.3));
+  }
+
+  .neon-button {
+    transition: box-shadow 0.3s ease;
+  }
+  .neon-button:hover {
+    box-shadow: 0 0 12px rgba(0, 255, 198, 0.6), 0 0 4px rgba(0, 255, 198, 0.4);
   }
 }
 
-/* --- Glass-Morphism for Option Cards --- */
+/* --- Glass-Morphism Option Cards --- */
 @layer components {
   .glass-box {
-    padding: 1rem;         /* Using rem instead of percentage for consistency */
-    margin: 1.5rem 0;
+    padding: 1rem;
+    margin: 1rem 0;
     width: 90%;
     min-width: 30%;
     border-radius: 10px;
@@ -162,59 +223,8 @@
     cursor: pointer;
     transition: transform 0.3s ease;
   }
-  
+
   .glass-box:hover {
     transform: scale(1.05);
-  }
-}
-
-/* --- Animation Utilities --- */
-@layer utilities {
-  @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  .animate-fade-down {
-    animation: fadeDown 1s ease-out forwards;
-  }
-  
-  .animate-delay-1000 {
-    animation-delay: 1s;
-  }
-  
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  .animate-fade-out {
-    animation: fadeOut 2.5s ease-in-out forwards;
-  }
-  
-  .animate-fade-in {
-    animation: fadeIn 2s ease-linear forwards;
-  }
-}
-
-/* --- Responsive Container Padding --- */
-@layer utilities {
-  .container {
-    padding: 14px; /* Mobile */
-  }
-  @media (min-width: 600px) {
-    .container {
-      padding: 20px; /* Tablet */
-    }
-  }
-  @media (min-width: 900px) {
-    .container {
-      padding: 24px; /* Desktop */
-    }
   }
 }
