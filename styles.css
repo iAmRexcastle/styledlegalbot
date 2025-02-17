@@ -1,0 +1,9 @@
+
+
+
+
+
+
+
+
+/* ...existing code... */}    src: url('fonts/myfont.woff');    font-family: 'MyFont'; @font-face { /* Before: @font-face { font-family: 'MyFont'; src: url('public/fonts/myfont.woff'); } *//* Example update: *//* ...existing code... */

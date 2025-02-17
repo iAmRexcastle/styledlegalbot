@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")          // Pooled connection for runtime
+  directUrl = env("DATABASE_URL_UNPOOLED")   // Unpooled connection for migrations
+}
+
+model Lead {
+  id                   String   @id @default(uuid())
+  firstName            String
+  lastName             String
+  email                String   @unique
+  phone                String
+
+  // Basic Tracking Parameters
+  clickid              String?  // Ad network provided click ID (e.g., Voluum, Facebook, Google, TikTok)
+  trackingUid          String?  // Your custom robust click tracking UID
+  clickTimestamp       DateTime? // Timestamp when the click occurred
+  clickPayload         Json?    // JSON payload with all click parameters
+
+  externalid           String?  // External tracking ID from a traffic source
+  externalidparameter  String?  // External ID type (for example, from a partner platform)
+
+  utm_source           String?  // UTM source (e.g., Facebook, Google)
+  utm_medium           String?  // UTM medium (e.g., CPC, email)
+  utm_campaign         String?  // UTM campaign name or ID
+  utm_term             String?  // UTM term (keyword)
+  utm_content          String?  // UTM content (ad variation)
+  referrer             String?  // Referring URL/domain
+
+  // Device, Browser, and Network Information
+  ip_address           String?  // Visitor's public IP address
+  user_agent           String?  // Browser and OS details
+  deviceType           String?  // Device type (mobile, desktop, tablet)
+  deviceBrand          String?  // Device brand (e.g., Apple)
+  deviceModel          String?  // Device model (e.g., iPhone 13)
+  browserName          String?  // Browser name (e.g., Chrome)
+  browserVersion       String?  // Browser version
+  osName               String?  // Operating system name (e.g., iOS, Windows)
+  osVersion            String?  // Operating system version
+  country              String?  // 2-letter country code
+  countryName          String?  // Full country name
+  region               String?  // Region or state
+  city                 String?  // City
+  isp                  String?  // Internet Service Provider name
+  connectionType       String?  // Connection type (e.g., wifi, 4g)
+  carrier              String?  // Mobile carrier name
+  language             String?  // Visitor's browser language
+
+  // Advanced Media Buying & Conversion Tracking
+  cid                  String?  // Campaign ID used for media buying
+  mediaTokens          Json?    // JSON object with various media buying tokens
+  googlePixel          String?  // Google Ads conversion pixel
+  voluumId             String?  // Voluum tracking ID
+  revcontentId         String?  // Revcontent campaign ID
+  tiktokPixel          String?  // TikTok conversion pixel
+  facebookPixel        String?  // Facebook Ads conversion pixel
+  linkedinPixel        String?  // LinkedIn Ads conversion pixel
+  paramM               String?  // Additional parameter "m=" value
+
+  // Financial & Campaign Data
+  payout               Float?   // Offer payout value
+  cost                 Float?   // Visit cost value
+  payoutCurrency       String?  // Currency for the payout (e.g., USD)
+  campaignId           String?  // Campaign ID (from ad network)
+  campaignName         String?  // Campaign name
+  trafficsourceId      String?  // Traffic source ID
+  trafficsourceName    String?  // Traffic source name
+
+  // Custom Variables & Additional Parameters
+  customVars           Json?    // JSON object for custom variables (var1 to var10 or dynamic tokens)
+  transactionId        String?  // Transaction ID from affiliate networks
+  eventType            String?  // Custom conversion event type
+  conversionCost       Float?   // Cost associated with the conversion
+  workspaceId          String?  // Workspace ID (if applicable)
+  workspaceName        String?  // Workspace name
+  pathId               String?  // ID of the tracking path
+  pathName             String?  // Name of the tracking path
+  trackingDomain       String?  // Tracking domain name
+  postbackTime         DateTime? // Timestamp when the conversion postback occurred
+
+  // Additional Conversion/Meta Data
+  conversionEvents     Json?    // JSON field to store detailed conversion event data
+  snapshotData         Json?    // JSON field for snapshot data or additional tracking info
+  meta                 Json?    // JSON field for extra meta information (e.g., additional ad data)
+
+  // Timestamps
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([clickid])
+  @@index([trackingUid])
+  @@index([utm_source, utm_campaign])
+  @@index([clickid, trackingUid])
+  @@index([campaignId])
+  @@index([trafficsourceId])
+}

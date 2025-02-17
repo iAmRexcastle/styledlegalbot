@@ -45,8 +45,9 @@ export async function continueConversation(history: Message[]) {
             .describe('The unit to display the temperature in'),
         }),
         execute: async ({ city, unit }) => {
-          stream.done(<Weather city={city} unit={unit} />);
-          return `Here's the weather for ${city}!`; 
+          // Removed usage of the Weather component.
+          stream.done(`Weather processed for ${city} in ${unit}`);
+          return `Here's the weather for ${city}!`;
         },
       },
     },
