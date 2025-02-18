@@ -1,210 +1,73 @@
-/* stylelint at-rule-no-unknown: [true, { ignoreAtRules: ["apply", "tailwind"] }] */
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-/* --- Animated Gradient Text Variables & Keyframes --- */
-@property --color-1 {
-  syntax: "<color>";
-  inherits: false;
-  initial-value: hsl(98, 100%, 62%);
+/* --- Animated Gradient Background --- */
+@keyframes gradient-animation {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.gradient-background {
+  background: linear-gradient(163deg, #070017, #1e0861, #17102d, #4b008e);
+  background-size: 240% 240%;
+  /* 25% faster than 8s: 8s * 0.75 = 6s */
+  animation: gradient-animation 6s ease infinite;
+  min-height: 100vh;
 }
 
-@property --color-2 {
-  syntax: "<color>";
-  inherits: false;
-  initial-value: hsl(204, 100%, 59%);
+/* --- Fade Animations --- */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-down {
+  animation: fadeDown 1s ease-out forwards;
+}
+.animate-delay-1000 {
+  animation-delay: 1s;
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-out {
+  animation: fadeOut 2.5s ease-in-out forwards;
+}
+.animate-fade-in {
+  animation: fadeIn 2s ease-linear forwards;
 }
 
-@keyframes gradient-change {
-  from {
-    --color-1: hsl(98, 100%, 62%);
-    --color-2: hsl(204, 100%, 59%);
+/* --- Neon and Pulsing Effects --- */
+@keyframes logoPulse {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px rgba(0, 255, 198, 0.4));
   }
-  to {
-    --color-1: hsl(210, 100%, 59%);
-    --color-2: hsl(310, 100%, 59%);
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 12px rgba(0, 255, 198, 0.8));
   }
-}
-
-/* Headline gradient effect */
-.animated-gradient-headline {
-  animation: gradient-change 5s linear infinite alternate;
-  background: linear-gradient(to right, var(--color-1), var(--color-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-}
-
-/* --- Custom Fonts --- */
-@font-face {
-  font-family: 'Montserrat ExtraBold';
-  src: url('/src/fonts/Montserrat-ExtraBold.ttf') format('truetype');
-  font-weight: 800;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'BarlowCondensed-Black';
-  src: url('/src/fonts/BarlowCondensed-Black.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'BarlowCondensed-MediumItalic';
-  src: url('/src/fonts/BarlowCondensed-MediumItalic.ttf') format('truetype');
-  font-weight: 500;
-  font-style: italic;
-}
-
-/* --- Root Variables & Typography --- */
-:root {
-  --headline-font: 'BarlowCondensed-Black', sans-serif;
-  --subhead-font: 'BarlowCondensed-MediumItalic', sans-serif;
-  --body-font: 'Montserrat', sans-serif;
-  --attorney-text-color: #777777;
-}
-
-/* --- Base Styles --- */
-@layer base {
-  body {
-    /* Removed @apply due to unknown at rule error */
-    background-color: black;
-    color: white;
-    font-family: var(--body-font);
-    font-size: 1rem;
-    line-height: 1.6;
-  }
-
-  /* Attorney Advertisement */
-  .attorney-ad {
-    margin-top: 0;
-    text-align: center;
-    color: var(--attorney-text-color);
-  }
-
-  /* Headline */
-  .animated-headline {
-    font-family: var(--headline-font);
-    font-size: 2.5rem;
-    line-height: 3rem; /* More comfortable spacing for multi-line headlines */
-    letter-spacing: 0.12rem;
-    margin: 0 auto;
-  }
-
-  /* Subhead with improved line-height */
-  .animated-subhead {
-    font-family: var(--subhead-font);
-    font-size: 1.5rem;
-    line-height: 1.4; /* Increased line-height for better readability */
-    margin: 1.5rem 0;
-    text-align: center;
-  }
-
-  /* Emoji Paragraph */
-  .emoji-paragraph {
-    margin: 1rem 0;
-    font-size: 3em;
-    text-align: center;
-  }
-
-  /* Quiz Question / Emphasis Text */
-  .quiz-question {
-    font-family: 'Montserrat ExtraBold', sans-serif;
-    font-size: 1.1rem;
-    text-align: center;
-    margin: 1rem 0;
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px rgba(0, 255, 198, 0.4));
   }
 }
-
-/* --- Utilities & Animations --- */
-@layer utilities {
-  .gradient-background {
-    background: linear-gradient(163deg, #070017, #1e0861, #17102d, #4b008e);
-    background-size: 240% 240%;
-    animation: gradient-animation 8s ease infinite;
-    min-height: 100vh;
-  }
-  @keyframes gradient-animation {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .animate-fade-down {
-    animation: fadeDown 1s ease-out forwards;
-  }
-  .animate-delay-1000 {
-    animation-delay: 1s;
-  }
-
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to   { opacity: 0; }
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  .animate-fade-out {
-    animation: fadeOut 2.5s ease-in-out forwards;
-  }
-  .animate-fade-in {
-    animation: fadeIn 2s ease-linear forwards;
-  }
-
-  /* Container padding for responsiveness */
-  .container {
-    padding: 14px; /* Mobile */
-  }
-  @media (min-width: 600px) {
-    .container {
-      padding: 20px; /* Tablet */
-    }
-  }
-  @media (min-width: 900px) {
-    .container {
-      padding: 24px; /* Desktop */
-    }
-  }
-
-  /* New additions for neon and pulsing effects */
-  @keyframes logoPulse {
-    0% {
-      transform: scale(1);
-      filter: drop-shadow(0 0 4px rgba(0, 255, 198, 0.4));
-    }
-    50% {
-      transform: scale(1.06);
-      filter: drop-shadow(0 0 10px rgba(0, 255, 198, 0.7));
-    }
-    100% {
-      transform: scale(1);
-      filter: drop-shadow(0 0 4px rgba(0, 255, 198, 0.4));
-    }
-  }
-
-  .logo-pulse {
-    animation: logoPulse 2.5s ease-in-out infinite;
-  }
-
-  .neon-logo-container {
-    /* Bigger glow around the entire container */
-    filter: drop-shadow(0 0 8px rgba(0, 255, 198, 0.3));
-  }
-
-  .neon-button {
-    transition: box-shadow 0.3s ease;
-  }
-  .neon-button:hover {
-    box-shadow: 0 0 12px rgba(0, 255, 198, 0.6), 0 0 4px rgba(0, 255, 198, 0.4);
-  }
+.logo-pulse {
+  animation: logoPulse 2.5s ease-in-out infinite;
+}
+.neon-logo-container {
+  filter: drop-shadow(0 0 8px rgba(0, 255, 198, 0.3));
+}
+.neon-button {
+  transition: box-shadow 0.3s ease;
+}
+.neon-button:hover {
+  box-shadow: 0 0 12px rgba(0, 255, 198, 0.6), 0 0 4px rgba(0, 255, 198, 0.4);
 }
 
 /* --- Glass-Morphism Option Cards --- */
@@ -226,8 +89,81 @@
     cursor: pointer;
     transition: transform 0.3s ease;
   }
-
   .glass-box:hover {
     transform: scale(1.05);
+  }
+}
+
+/* --- Custom Font Faces --- */
+@font-face {
+  font-family: 'Montserrat ExtraBold';
+  src: url('/src/fonts/Montserrat-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Montserrat LightItalic';
+  src: url('/src/fonts/Montserrat-LightItalic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'BarlowCondensed-Black';
+  src: url('/src/fonts/BarlowCondensed-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'BarlowCondensed-MediumItalic';
+  src: url('/src/fonts/BarlowCondensed-MediumItalic.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* --- Root Variables & Typography --- */
+:root {
+  --headline-font: 'BarlowCondensed-Black', sans-serif;
+  --subhead-font: 'Montserrat LightItalic', sans-serif;
+  --body-font: 'Montserrat', sans-serif;
+  --attorney-text-color: #777777;
+}
+
+@layer base {
+  body {
+    background-color: black;
+    color: white;
+    font-family: var(--body-font);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  .attorney-ad {
+    margin-top: 0;
+    text-align: center;
+    color: var(--attorney-text-color);
+  }
+  .animated-headline {
+    font-family: var(--headline-font);
+    font-size: 2.5rem;
+    line-height: 3rem;
+    letter-spacing: 0.12rem;
+    margin: 0 auto;
+  }
+  .animated-subhead {
+    font-family: var(--subhead-font);
+    font-size: 1.5rem;
+    line-height: 1.4;
+    margin: 1.5rem 0;
+    text-align: center;
+  }
+  .emoji-paragraph {
+    margin: 1rem 0;
+    font-size: 3em;
+    text-align: center;
+  }
+  .quiz-question {
+    font-family: 'Montserrat ExtraBold', sans-serif;
+    font-size: 1.1rem;
+    text-align: center;
+    margin: 1rem 0;
   }
 }

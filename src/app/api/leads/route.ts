@@ -1,10 +1,9 @@
 // src/app/api/leads/route.ts
-import type { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import axios from "axios";
 
-// Define the shape of our incoming tracking data.
-interface LeadRequestBody {
+interface LeadData {
   firstName?: string;
   lastName?: string;
   phone?: string;
@@ -18,39 +17,29 @@ interface LeadRequestBody {
   ttclid?: string;
 }
 
-// This handler accepts POST requests.
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== "POST") {
-    return res
-      .status(405)
-      .json({ success: false, error: "Method Not Allowed" });
-  }
-
-  // Parse the incoming JSON body.
-  const {
-    firstName,
-    lastName,
-    phone,
-    email,
-    utm_campaign,
-    utm_source,
-    utm_medium,
-    campaignId,
-    adsetId,
-    creativeId,
-    ttclid,
-  } = req.body as LeadRequestBody;
-
-  // Determine if we have the complete lead information.
-  const isComplete =
-    Boolean(firstName && lastName && phone && email);
-
+export async function POST(request: Request) {
   try {
-    // Create an intermediary tracking record.
-    const trackingRecord = await prisma.trackingEvent.create({
+    // Parse the JSON body from the request
+    const body = (await request.json()) as LeadData;
+    const {
+      firstName,
+      lastName,
+      phone,
+      email,
+      utm_campaign,
+      utm_source,
+      utm_medium,
+      campaignId,
+      adsetId,
+      creativeId,
+      ttclid,
+    } = body;
+
+    // Determine if the lead details are complete (for CRM submission)
+    const isComplete = Boolean(firstName && lastName && phone && email);
+
+    // Create an intermediary tracking record in your database
+    const trackingData = await prisma.trackingEvent.create({
       data: {
         first_name: firstName || null,
         last_name: lastName || null,
@@ -67,58 +56,52 @@ export default async function handler(
       },
     });
 
-    // If the lead data is not complete, return a partial success message.
-    if (!isComplete) {
-      return res.status(201).json({
-        success: true,
-        data: trackingRecord,
-        message:
-          "Partial tracking data recorded. Awaiting complete lead details.",
+    // If we have full lead details, forward the data to Pipedrive
+    if (isComplete) {
+      const pipedriveUrl = "https://mtimid.com/panel/api/v1/lead";
+      const pipedriveHeaders = {
+        "Content-Type": "application/json",
+        "x-auth-token": "9isnu8117638x972ol9i", // Replace with your actual token
+      };
+
+      const pipedriveData = {
+        offer: "eaton_fire",
+        email,
+        phone,
+        first_name: firstName,
+        last_name: lastName,
+        description:
+          "Lead submitted with tracking data: " +
+          JSON.stringify({
+            utm_campaign,
+            utm_source,
+            utm_medium,
+            campaignId,
+            adsetId,
+            creativeId,
+            ttclid,
+          }),
+        dryrun: "yes", // Adjust or remove as needed
+      };
+
+      await axios.post(pipedriveUrl, pipedriveData, { headers: pipedriveHeaders });
+
+      // Optionally update the record to mark that it has been forwarded to Pipedrive
+      await prisma.trackingEvent.update({
+        where: { id: trackingData.id },
+        data: { sentToPipedrive: true },
       });
     }
 
-    // If complete, prepare data for Pipedrive.
-    const pipedriveUrl = "https://mtimid.com/panel/api/v1/lead";
-    const pipedriveHeaders = {
-      "Content-Type": "application/json",
-      "x-auth-token": "9isnu8117638x972ol9i", // Use your actual token
-    };
-
-    const pipedriveData = {
-      offer: "eaton_fire",
-      email,
-      phone,
-      first_name: firstName,
-      last_name: lastName,
-      description:
-        "Lead submitted with tracking data: " +
-        JSON.stringify({
-          utm_campaign,
-          utm_source,
-          utm_medium,
-          campaignId,
-          adsetId,
-          creativeId,
-          ttclid,
-        }),
-      dryrun: "yes", // Adjust or remove this flag as needed.
-      // Include any qualifier fields if required by the API.
-    };
-
-    // Forward the complete lead data to Pipedrive.
-    await axios.post(pipedriveUrl, pipedriveData, { headers: pipedriveHeaders });
-
-    // Update the tracking record to indicate it has been sent.
-    await prisma.trackingEvent.update({
-      where: { id: trackingRecord.id },
-      data: { sentToPipedrive: true },
-    });
-
-    return res
-      .status(201)
-      .json({ success: true, data: trackingRecord, message: "Lead data fully processed and sent to Pipedrive." });
+    return NextResponse.json(
+      { success: true, data: trackingData },
+      { status: 201 }
+    );
   } catch (error: any) {
-    console.error("Error processing lead tracking:", error);
-    return res.status(500).json({ success: false, error: error.message });
+    console.error("Error creating lead:", error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
