@@ -1,5 +1,5 @@
 const { NextResponse } = require('next/server');
-const { prisma } = require('~/lib/prisma');
+import { prisma } from '/lib/prisma.ts';
 
 // For partial lead tracking
 async function POST(req) {
