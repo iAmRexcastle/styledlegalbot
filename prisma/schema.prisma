@@ -4,11 +4,95 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+datasource db {
+  provider  = "postgresql"
+  url  	    = env("DATABASE_URL")
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+/// Define your event types (if needed)
+enum TrackingEventType {
+  ADD_PAYMENT_INFO
+  ADD_TO_CART
+  ADD_TO_WISHLIST
+  COMPLETE_REGISTRATION
+  CONTACT
+  CUSTOMIZE_PRODUCT
+  DONATE
+  FIND_LOCATION
+  INITIATE_CHECKOUT
+  LEAD
+  PURCHASE
+  SCHEDULE
+  SEARCH
+  START_TRIAL
+  SUBMIT_APPLICATION
+  SUBSCRIBE
+  VIEW_CONTENT
+}
+
+/// Platform model
+model Platform {
+  id             Int               @id @default(autoincrement())
+  name           String
+  campaigns      Campaign[]        @relation("PlatformCampaigns")
+  trackingEvents TrackingEvent[]   @relation("PlatformTrackingEvents")
+  analytics      AnalyticsEvent[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+/// Campaign model
+model Campaign {
+  id             Int               @id @default(autoincrement())
+  name           String
+  platformId     Int
+  platform       Platform          @relation("PlatformCampaigns", fields: [platformId], references: [id])
+  ads            Ad[]              @relation("CampaignAds")
+  trackingEvents TrackingEvent[]   @relation("CampaignTrackingEvents")
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+/// Ad model
+model Ad {
+  id         Int               @id @default(autoincrement())
+  name       String?
+  campaignId Int
+  campaign   Campaign          @relation("CampaignAds", fields: [campaignId], references: [id])
+  adEvents   TrackingEvent[]   @relation("AdTrackingEvents")
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+}
+
+/// TrackingEvent model
+model TrackingEvent {
+  id          Int              @id @default(autoincrement())
+  eventType   TrackingEventType
+  eventTime   DateTime         @default(now())
+  currency    String?
+  value       Float?
+  contentIds  String[]         @default([])  // Use a non-optional list
+  contents    Json?
+  contentType String?
+  platformId  Int?
+  platform    Platform?        @relation("PlatformTrackingEvents", fields: [platformId], references: [id])
+  campaignId  Int?
+  campaign    Campaign?        @relation("CampaignTrackingEvents", fields: [campaignId], references: [id])
+  adId        Int?
+  ad          Ad?              @relation("AdTrackingEvents", fields: [adId], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+/// AnalyticsEvent model (define as needed)
+model AnalyticsEvent {
+  id         Int      @id @default(autoincrement())
+  platformId Int
+  platform   Platform @relation(fields: [platformId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

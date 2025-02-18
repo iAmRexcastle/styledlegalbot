@@ -5,7 +5,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { IconSeparator, IconVercel } from '@/components/ui/icons'
 import EnvCard from './cards/envcard'
 
-export async function Header() {
+export function Header() {
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between w-full h-16 px-4 border-b shrink-0 bg-white ">  
       <EnvCard />

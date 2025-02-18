@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
-import { prisma } from "~/lib/prisma";
+const { NextResponse } = require('next/server');
+const { prisma } = require('~/lib/prisma');
 
 // For partial lead tracking
-export async function POST(req: Request) {
+async function POST(req) {
   try {
     const data = await req.json();
     console.log("Partial lead data:", data);
@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 }
 
 // For final lead submission
-export async function PATCH(req: Request) {
+async function PATCH(req) {
   try {
     const data = await req.json();
     console.log("Final lead data:", data);
@@ -33,3 +33,5 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
 }
+
+module.exports = { POST, PATCH };
