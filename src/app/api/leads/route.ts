@@ -1,25 +1,24 @@
-const { NextResponse } = require('next/server');
-import { prisma } from '/lib/prisma.ts';
+// src/app/api/leads/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '~/lib/prisma';
 
-// For partial lead tracking
-async function POST(req) {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const data = await req.json();
-    console.log("Partial lead data:", data);
+    console.log('Partial lead data:', data);
     // Optionally: store partial tracking info to your DB
     return NextResponse.json({ success: true, partialLead: data });
   } catch (error) {
-    console.error("Error in POST /api/leads", error);
-    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
+    console.error('Error in POST /api/leads', error);
+    return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
   }
 }
 
-// For final lead submission
-async function PATCH(req) {
+export async function PATCH(req: NextRequest): Promise<NextResponse> {
   try {
     const data = await req.json();
-    console.log("Final lead data:", data);
-    
+    console.log('Final lead data:', data);
+
     // Store final lead in your database using Prisma
     const lead = await prisma.lead.create({
       data: { ...data },
@@ -29,9 +28,7 @@ async function PATCH(req) {
 
     return NextResponse.json({ success: true, lead });
   } catch (error) {
-    console.error("Error in PATCH /api/leads", error);
-    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
+    console.error('Error in PATCH /api/leads', error);
+    return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
   }
 }
-
-module.exports = { POST, PATCH };

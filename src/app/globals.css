@@ -1,3 +1,4 @@
+/* stylelint at-rule-no-unknown: [true, { ignoreAtRules: ["apply", "tailwind"] }] */
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
@@ -69,7 +70,9 @@
 /* --- Base Styles --- */
 @layer base {
   body {
-    @apply bg-black text-white;
+    /* Removed @apply due to unknown at rule error */
+    background-color: black;
+    color: white;
     font-family: var(--body-font);
     font-size: 1rem;
     line-height: 1.6;
@@ -214,8 +217,8 @@
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.1);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    backdrop-filter: blur(3.5px);
     -webkit-backdrop-filter: blur(3.5px);
+    backdrop-filter: blur(3.5px);
     border: 1px solid rgba(255, 255, 255, 0.18);
     font-family: 'Montserrat ExtraBold', sans-serif;
     font-size: 1.25rem;
