@@ -1,4 +1,3 @@
-// src/lib/prisma.ts
 import { PrismaClient } from '@prisma/client';
 
 if (!process.env.DATABASE_URL) {
@@ -11,11 +10,11 @@ let prisma: PrismaClient;
 if (process.env.NODE_ENV === 'production') {
   prisma = new PrismaClient();
 } else {
-  // Prevent multiple instances of Prisma in development (with hot reloading)
-  if (!(global as any).prisma) {
-    (global as any).prisma = new PrismaClient();
+  // Prevent multiple instances of Prisma Client in development due to hot reloading.
+  if (!global.prisma) {
+    global.prisma = new PrismaClient();
   }
-  prisma = (global as any).prisma;
+  prisma = global.prisma;
 }
 
 export { prisma };
