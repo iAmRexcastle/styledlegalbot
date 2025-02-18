@@ -12,18 +12,19 @@ export default async function handler(
   }
 
   try {
+    // Database and API tracking interaction starts here
     const leadRecord = await prisma.trackingEvent.create({
       data: {
-        first_name: req.body.firstName,
-        last_name: req.body.lastName,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
         phone: req.body.phone,
         email: req.body.email,
-        utm_campaign: req.body.utm_campaign,
-        utm_source: req.body.utm_source,
-        utm_medium: req.body.utm_medium,
-        campaign_id: req.body.campaignId,
-        adset_id: req.body.adsetId,
-        creative_id: req.body.creativeId,
+        utmCampaign: req.body.utm_campaign,
+        utmSource: req.body.utm_source,
+        utmMedium: req.body.utm_medium,
+        campaignId: req.body.campaignId,
+        adsetId: req.body.adsetId,
+        creativeId: req.body.creativeId,
         ttclid: req.body.ttclid,
       },
     });

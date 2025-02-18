@@ -1,6 +1,7 @@
 // src/app/api/leads/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 import axios from "axios";
 
 interface LeadData {
@@ -34,6 +35,9 @@ export async function POST(request: Request) {
       creativeId,
       ttclid,
     } = body;
+
+    // This is where the database/API tracking interaction occurs
+    // /* Database and API tracking interaction */
 
     // Determine if the lead details are complete (for CRM submission)
     const isComplete = Boolean(firstName && lastName && phone && email);
