@@ -1,12 +1,9 @@
 const path = require('path');
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-	webpack: (config) => {
-		// Map the "~" alias to the "src" directory
-		config.resolve.alias['~'] = path.join(__dirname, 'src');
-		return config;
-	},
+module.exports = {
+  webpack: (config) => {
+    // Ensure the "~" alias points to the "src" folder
+    config.resolve.alias['~'] = path.join(__dirname, 'src');
+    return config;
+  },
 };
-
-module.exports = nextConfig;
