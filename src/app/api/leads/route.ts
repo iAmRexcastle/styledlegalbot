@@ -5,14 +5,13 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 
 // Define a Zod schema for incoming lead data.
-// Note: Personal fields (first_name, last_name, phone, email) are optional
-// because they might be filled later in the funnel.
+// Personal fields are optional since the user may fill them later.
 const LeadSchema = z.object({
   first_name: z.string().optional(),
   last_name: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().email().optional(),
-  // Tracking parameters (UTMs, campaign info, tokens, etc.)
+  // Tracking parameters and tokens (UTM, campaign info, etc.)
   utm_campaign: z.string().optional(),
   utm_source: z.string().optional(),
   utm_medium: z.string().optional(),
@@ -22,8 +21,8 @@ const LeadSchema = z.object({
   ttclid: z.string().optional(),
 });
 
-// Helper function to fire a tracking pixel (by performing a GET request).
-async function fireTrackingPixel(url: string) {
+// Helper function to fire a tracking pixel (by sending a simple GET request).
+async function fireTrackingPixel(url: string): Promise<void> {
   try {
     await fetch(url);
   } catch (error) {
@@ -31,21 +30,22 @@ async function fireTrackingPixel(url: string) {
   }
 }
 
-// POST handler for the API route.
+// POST handler for processing the lead data.
 export async function POST(request: Request) {
   try {
-    // Parse and validate the JSON payload.
+    // Parse and validate the incoming JSON payload.
     const jsonData = await request.json();
     const leadData = LeadSchema.parse(jsonData);
 
-    // FIRE INITIAL PIXEL: triggered immediately when the lead is received.
-    const initialPixelUrl = process.env.INITIAL_PIXEL_URL;
-    if (initialPixelUrl) {
-      fireTrackingPixel(initialPixelUrl);
+    // FIRE INITIAL PIXEL:
+    // Immediately fire a pixel when the lead is received.
+    if (process.env.INITIAL_PIXEL_URL) {
+      fireTrackingPixel(process.env.INITIAL_PIXEL_URL);
     }
 
-    // STORE LEAD DATA: Save the lead in the database.
-    // IMPORTANT: Adjust "prisma.leads" to match the name of your model in your Prisma schema.
+    // STORE LEAD DATA:
+    // Save the lead in your database.
+    // IMPORTANT: Use `prisma.leads` if your model is named "Leads" in your Prisma schema.
     const leadRecord = await prisma.leads.create({
       data: {
         first_name: leadData.first_name,
@@ -62,8 +62,9 @@ export async function POST(request: Request) {
       },
     });
 
-    // OPTIONAL: Save an engagement event (if your schema/model exists).
-    // This step records an analytic event tied to the lead.
+    // OPTIONAL ANALYTICS EVENT:
+    // If your Prisma client exposes a relation (e.g. a "leadEvent" model),
+    // record an engagement event. (Adjust or remove this section if not applicable.)
     if ((prisma as any).leadEvent) {
       await (prisma as any).leadEvent.create({
         data: {
@@ -74,38 +75,37 @@ export async function POST(request: Request) {
       });
     }
 
-    // FIRE SUBMISSION PIXEL: triggered after storing the lead.
-    const submissionPixelUrl = process.env.SUBMISSION_PIXEL_URL;
-    if (submissionPixelUrl) {
-      fireTrackingPixel(submissionPixelUrl);
+    // FIRE SUBMISSION PIXEL:
+    // Fire a pixel after storing the lead.
+    if (process.env.SUBMISSION_PIXEL_URL) {
+      fireTrackingPixel(process.env.SUBMISSION_PIXEL_URL);
     }
 
-    // FORWARD DATA TO PIPEDRIVE: Send the lead data to your Pipedrive webhook.
-    const pipedriveWebhookUrl = process.env.PIPEDRIVE_WEBHOOK_URL || '';
-    const pipedriveResponse = await fetch(pipedriveWebhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(leadData),
-    });
-    if (!pipedriveResponse.ok) {
-      throw new Error('Failed to send data to Pipedrive');
+    // FORWARD DATA TO PIPEDRIVE:
+    // Send the lead data to your Pipedrive webhook.
+    if (process.env.PIPEDRIVE_WEBHOOK_URL) {
+      const pipedriveResponse = await fetch(process.env.PIPEDRIVE_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(leadData),
+      });
+      if (!pipedriveResponse.ok) {
+        throw new Error('Failed to send data to Pipedrive');
+      }
     }
 
-    // FIRE LOGIN/FINAL PIXEL: triggered when the user later logs in or creates an account.
-    const loginPixelUrl = process.env.LOGIN_PIXEL_URL;
-    if (loginPixelUrl) {
-      fireTrackingPixel(loginPixelUrl);
+    // FIRE LOGIN/FINAL PIXEL:
+    // Fire another pixel when the user eventually logs in or creates an account.
+    if (process.env.LOGIN_PIXEL_URL) {
+      fireTrackingPixel(process.env.LOGIN_PIXEL_URL);
     }
 
-    // Return a successful JSON response.
+    // Return a JSON response indicating success.
     return NextResponse.json({ success: true, leadId: leadRecord.id });
   } catch (error) {
     console.error('Error processing lead submission:', error);
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 400 }
     );
   }
