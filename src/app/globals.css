@@ -2,117 +2,63 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-/* --- Animated Gradient Background --- */
-@keyframes gradient-animation {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-.gradient-background {
-  background: linear-gradient(163deg, #070017, #1e0861, #17102d, #4b008e);
-  background-size: 240% 240%;
-  /* 25% faster than 8s: 8s * 0.75 = 6s */
-  animation: gradient-animation 6s ease infinite;
-  min-height: 100vh;
+/* --- Animated Gradient Text Variables & Keyframes --- */
+@property --color-1 {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: hsl(98, 100%, 62%);
 }
 
-/* --- Fade Animations --- */
-@keyframes fadeDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-down {
-  animation: fadeDown 1s ease-out forwards;
-}
-.animate-delay-1000 {
-  animation-delay: 1s;
-}
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-.animate-fade-out {
-  animation: fadeOut 2.5s ease-in-out forwards;
-}
-.animate-fade-in {
-  animation: fadeIn 2s ease-linear forwards;
+@property --color-2 {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: hsl(204, 100%, 59%);
 }
 
-/* --- Neon and Pulsing Effects --- */
-@keyframes logoPulse {
-  0% {
-    transform: scale(1);
-    filter: drop-shadow(0 0 4px rgba(0, 255, 198, 0.4));
-  }
-  50% {
-    transform: scale(1.1);
-    filter: drop-shadow(0 0 12px rgba(0, 255, 198, 0.8));
-  }
-  100% {
-    transform: scale(1);
-    filter: drop-shadow(0 0 4px rgba(0, 255, 198, 0.4));
-  }
-}
-.logo-pulse {
-  animation: logoPulse 2.5s ease-in-out infinite;
-}
-.neon-logo-container {
-  filter: drop-shadow(0 0 8px rgba(0, 255, 198, 0.3));
-}
-.neon-button {
-  transition: box-shadow 0.3s ease;
-}
-.neon-button:hover {
-  box-shadow: 0 0 12px rgba(0, 255, 198, 0.6), 0 0 4px rgba(0, 255, 198, 0.4);
-}
-
-/* --- Glass-Morphism Option Cards --- */
-@layer components {
-  .glass-box {
-    padding: 1rem;
-    margin: 1rem 0;
-    width: 90%;
-    min-width: 30%;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    -webkit-backdrop-filter: blur(3.5px);
-    backdrop-filter: blur(3.5px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    font-family: 'Montserrat ExtraBold', sans-serif;
-    font-size: 1.25rem;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-  }
-  .glass-box:hover {
-    transform: scale(1.05);
+@keyframes gradient-change {
+  to {
+    --color-1: hsl(210, 100%, 59%);
+    --color-2: hsl(310, 100%, 59%);
   }
 }
 
-/* --- Custom Font Faces --- */
+/* Animated gradient text effect for headline */
+.animated-gradient-headline {
+  animation: gradient-change 5s linear infinite alternate;
+  background: linear-gradient(to right, var(--color-1), var(--color-2));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Animated gradient text effect for subhead (if desired, currently applied to headline only) */
+.animated-gradient-subhead {
+  /* Uncomment if you want a gradient on the subhead:
+  animation: gradient-change 5s linear infinite alternate;
+  background: linear-gradient(to right, var(--color-1), var(--color-2));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  */
+}
+
+/* --- Custom Fonts --- */
 @font-face {
   font-family: 'Montserrat ExtraBold';
   src: url('/src/fonts/Montserrat-ExtraBold.ttf') format('truetype');
   font-weight: 800;
   font-style: normal;
 }
-@font-face {
-  font-family: 'Montserrat LightItalic';
-  src: url('/src/fonts/Montserrat-LightItalic.ttf') format('truetype');
-  font-weight: 300;
-  font-style: italic;
-}
+
 @font-face {
   font-family: 'BarlowCondensed-Black';
   src: url('/src/fonts/BarlowCondensed-Black.ttf') format('truetype');
   font-weight: 900;
   font-style: normal;
 }
+
 @font-face {
   font-family: 'BarlowCondensed-MediumItalic';
   src: url('/src/fonts/BarlowCondensed-MediumItalic.ttf') format('truetype');
@@ -123,47 +69,152 @@
 /* --- Root Variables & Typography --- */
 :root {
   --headline-font: 'BarlowCondensed-Black', sans-serif;
-  --subhead-font: 'Montserrat LightItalic', sans-serif;
+  --subhead-font: 'BarlowCondensed-MediumItalic', sans-serif;
   --body-font: 'Montserrat', sans-serif;
   --attorney-text-color: #777777;
 }
 
+/* --- Base Styles --- */
 @layer base {
   body {
-    background-color: black;
-    color: white;
+    @apply bg-black text-white;
     font-family: var(--body-font);
     font-size: 1rem;
     line-height: 1.6;
   }
+
+  /* Attorney Advertisement */
   .attorney-ad {
     margin-top: 0;
+    padding-bottom: 1.5rem; /* ~10% padding might be too much on small devices—use rem for consistency */
+    font-size: 0.875rem; /* ~14px */
     text-align: center;
     color: var(--attorney-text-color);
   }
+
+  /* Animated Headline */
   .animated-headline {
     font-family: var(--headline-font);
     font-size: 2.5rem;
-    line-height: 3rem;
+    line-height: 3.2rem;
     letter-spacing: 0.12rem;
+    text-align: center;
     margin: 0 auto;
   }
+
+  /* Animated Subhead */
   .animated-subhead {
     font-family: var(--subhead-font);
-    font-size: 1.5rem;
-    line-height: 1.4;
-    margin: 1.5rem 0;
+    font-size: 1.67rem;
     text-align: center;
+    margin: 2.5rem 0;  /* 2.5% top and bottom (using rem for consistency) */
+    line-height: 1rem;
   }
+
+  /* Emoji Paragraph */
   .emoji-paragraph {
     margin: 1rem 0;
     font-size: 3em;
     text-align: center;
   }
+
+  /* Quiz Question / Emphasis Text */
   .quiz-question {
     font-family: 'Montserrat ExtraBold', sans-serif;
     font-size: 1.1rem;
     text-align: center;
     margin: 1rem 0;
+  }
+}
+
+/* --- Animated Gradient Background --- */
+@layer utilities {
+  .gradient-background {
+    background: linear-gradient(163deg, #070017, #1e0861, #17102d, #4b008e);
+    background-size: 240% 240%;
+    animation: gradient-animation 8s ease infinite;
+    min-height: 100vh;
+  }
+  
+  @keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+}
+
+/* --- Glass-Morphism for Option Cards --- */
+@layer components {
+  .glass-box {
+    padding: 1rem;         /* Using rem instead of percentage for consistency */
+    margin: 1.5rem 0;
+    width: 90%;
+    min-width: 30%;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(3.5px);
+    -webkit-backdrop-filter: blur(3.5px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    font-family: 'Montserrat ExtraBold', sans-serif;
+    font-size: 1.25rem;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .glass-box:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* --- Animation Utilities --- */
+@layer utilities {
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-fade-down {
+    animation: fadeDown 1s ease-out forwards;
+  }
+  
+  .animate-delay-1000 {
+    animation-delay: 1s;
+  }
+  
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .animate-fade-out {
+    animation: fadeOut 2.5s ease-in-out forwards;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 2s ease-linear forwards;
+  }
+}
+
+/* --- Responsive Container Padding --- */
+@layer utilities {
+  .container {
+    padding: 14px; /* Mobile */
+  }
+  @media (min-width: 600px) {
+    .container {
+      padding: 20px; /* Tablet */
+    }
+  }
+  @media (min-width: 900px) {
+    .container {
+      padding: 24px; /* Desktop */
+    }
   }
 }
