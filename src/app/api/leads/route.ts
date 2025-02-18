@@ -1,112 +1,124 @@
 // src/app/api/leads/route.ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import { prisma } from "@/lib/prisma";
+import axios from "axios";
 
-import { NextResponse } from 'next/server';
-import { z } from 'zod';
-import { prisma } from '@/lib/prisma';
-
-// Define a Zod schema for incoming lead data.
-// Personal fields are optional since the user may fill them later.
-const LeadSchema = z.object({
-  first_name: z.string().optional(),
-  last_name: z.string().optional(),
-  phone: z.string().optional(),
-  email: z.string().email().optional(),
-  // Tracking parameters and tokens (UTM, campaign info, etc.)
-  utm_campaign: z.string().optional(),
-  utm_source: z.string().optional(),
-  utm_medium: z.string().optional(),
-  campaign_id: z.string().optional(),
-  adset_id: z.string().optional(),
-  creative_id: z.string().optional(),
-  ttclid: z.string().optional(),
-});
-
-// Helper function to fire a tracking pixel (by sending a simple GET request).
-async function fireTrackingPixel(url: string): Promise<void> {
-  try {
-    await fetch(url);
-  } catch (error) {
-    console.error('Error firing tracking pixel:', error);
-  }
+// Define the shape of our incoming tracking data.
+interface LeadRequestBody {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  email?: string;
+  utm_campaign?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  campaignId?: string;
+  adsetId?: string;
+  creativeId?: string;
+  ttclid?: string;
 }
 
-// POST handler for processing the lead data.
-export async function POST(request: Request) {
+// This handler accepts POST requests.
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== "POST") {
+    return res
+      .status(405)
+      .json({ success: false, error: "Method Not Allowed" });
+  }
+
+  // Parse the incoming JSON body.
+  const {
+    firstName,
+    lastName,
+    phone,
+    email,
+    utm_campaign,
+    utm_source,
+    utm_medium,
+    campaignId,
+    adsetId,
+    creativeId,
+    ttclid,
+  } = req.body as LeadRequestBody;
+
+  // Determine if we have the complete lead information.
+  const isComplete =
+    Boolean(firstName && lastName && phone && email);
+
   try {
-    // Parse and validate the incoming JSON payload.
-    const jsonData = await request.json();
-    const leadData = LeadSchema.parse(jsonData);
-
-    // FIRE INITIAL PIXEL:
-    // Immediately fire a pixel when the lead is received.
-    if (process.env.INITIAL_PIXEL_URL) {
-      fireTrackingPixel(process.env.INITIAL_PIXEL_URL);
-    }
-
-    // STORE LEAD DATA:
-    // Save the lead in your database.
-    // IMPORTANT: Use `prisma.leads` if your model is named "Leads" in your Prisma schema.
-    const leadRecord = await prisma.leads.create({
+    // Create an intermediary tracking record.
+    const trackingRecord = await prisma.trackingEvent.create({
       data: {
-        first_name: leadData.first_name,
-        last_name: leadData.last_name,
-        phone: leadData.phone,
-        email: leadData.email,
-        utm_campaign: leadData.utm_campaign,
-        utm_source: leadData.utm_source,
-        utm_medium: leadData.utm_medium,
-        campaign_id: leadData.campaign_id,
-        adset_id: leadData.adset_id,
-        creative_id: leadData.creative_id,
-        ttclid: leadData.ttclid,
+        first_name: firstName || null,
+        last_name: lastName || null,
+        phone: phone || null,
+        email: email || null,
+        utm_campaign: utm_campaign || null,
+        utm_source: utm_source || null,
+        utm_medium: utm_medium || null,
+        campaign_id: campaignId || null,
+        adset_id: adsetId || null,
+        creative_id: creativeId || null,
+        ttclid: ttclid || null,
+        isCompleted: isComplete,
       },
     });
 
-    // OPTIONAL ANALYTICS EVENT:
-    // If your Prisma client exposes a relation (e.g. a "leadEvent" model),
-    // record an engagement event. (Adjust or remove this section if not applicable.)
-    if ((prisma as any).leadEvent) {
-      await (prisma as any).leadEvent.create({
-        data: {
-          type: 'ENGAGEMENT',
-          detail: 'User engaged with chatbot',
-          leadId: leadRecord.id,
-        },
+    // If the lead data is not complete, return a partial success message.
+    if (!isComplete) {
+      return res.status(201).json({
+        success: true,
+        data: trackingRecord,
+        message:
+          "Partial tracking data recorded. Awaiting complete lead details.",
       });
     }
 
-    // FIRE SUBMISSION PIXEL:
-    // Fire a pixel after storing the lead.
-    if (process.env.SUBMISSION_PIXEL_URL) {
-      fireTrackingPixel(process.env.SUBMISSION_PIXEL_URL);
-    }
+    // If complete, prepare data for Pipedrive.
+    const pipedriveUrl = "https://mtimid.com/panel/api/v1/lead";
+    const pipedriveHeaders = {
+      "Content-Type": "application/json",
+      "x-auth-token": "9isnu8117638x972ol9i", // Use your actual token
+    };
 
-    // FORWARD DATA TO PIPEDRIVE:
-    // Send the lead data to your Pipedrive webhook.
-    if (process.env.PIPEDRIVE_WEBHOOK_URL) {
-      const pipedriveResponse = await fetch(process.env.PIPEDRIVE_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(leadData),
-      });
-      if (!pipedriveResponse.ok) {
-        throw new Error('Failed to send data to Pipedrive');
-      }
-    }
+    const pipedriveData = {
+      offer: "eaton_fire",
+      email,
+      phone,
+      first_name: firstName,
+      last_name: lastName,
+      description:
+        "Lead submitted with tracking data: " +
+        JSON.stringify({
+          utm_campaign,
+          utm_source,
+          utm_medium,
+          campaignId,
+          adsetId,
+          creativeId,
+          ttclid,
+        }),
+      dryrun: "yes", // Adjust or remove this flag as needed.
+      // Include any qualifier fields if required by the API.
+    };
 
-    // FIRE LOGIN/FINAL PIXEL:
-    // Fire another pixel when the user eventually logs in or creates an account.
-    if (process.env.LOGIN_PIXEL_URL) {
-      fireTrackingPixel(process.env.LOGIN_PIXEL_URL);
-    }
+    // Forward the complete lead data to Pipedrive.
+    await axios.post(pipedriveUrl, pipedriveData, { headers: pipedriveHeaders });
 
-    // Return a JSON response indicating success.
-    return NextResponse.json({ success: true, leadId: leadRecord.id });
-  } catch (error) {
-    console.error('Error processing lead submission:', error);
-    return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 400 }
-    );
+    // Update the tracking record to indicate it has been sent.
+    await prisma.trackingEvent.update({
+      where: { id: trackingRecord.id },
+      data: { sentToPipedrive: true },
+    });
+
+    return res
+      .status(201)
+      .json({ success: true, data: trackingRecord, message: "Lead data fully processed and sent to Pipedrive." });
+  } catch (error: any) {
+    console.error("Error processing lead tracking:", error);
+    return res.status(500).json({ success: false, error: error.message });
   }
 }
