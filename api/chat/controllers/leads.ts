@@ -1,3 +1,5 @@
+// api/chat/controllers/leads.ts
+
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma"; // Adjust the path/alias as needed
 
@@ -10,7 +12,7 @@ export default async function handler(
   }
 
   try {
-    // @ts-ignore: Temporarily bypass type-checking for Prisma create call
+    // @ts-ignore: Temporarily disable type-checking for this create call
     const leadRecord = await prisma.trackingEvent.create({
       data: {
         firstName: req.body.firstName,

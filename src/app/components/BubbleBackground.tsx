@@ -8,12 +8,12 @@ import { loadFull } from "tsparticles";
 
 export default function BubbleBackground() {
   const particlesInit = useCallback(async (engine: Engine) => {
-    // loadFull is imported from "tsparticles"
+    // Load full tsParticles package
     await loadFull(engine);
   }, []);
 
   const particlesLoaded = useCallback(async (container: Container | undefined) => {
-    // Optional: perform any post-load actions
+    // Optional: perform actions after particles have loaded
   }, []);
 
   return (
@@ -39,10 +39,7 @@ export default function BubbleBackground() {
           },
         },
         interactivity: {
-          events: {
-            onHover: { enable: true, mode: "repulse" },
-            resize: true,
-          },
+          events: { onHover: { enable: true, mode: "repulse" }, resize: true },
         },
         detectRetina: true,
       }}
