@@ -1,21 +1,18 @@
-// src/app/components/BubbleBackground.tsx
-
 "use client";
 
 import { useCallback } from "react";
 import Particles from "@tsparticles/react";
 import type { Engine, Container } from "@tsparticles/engine";
-// IMPORTANT: Import loadFull from "tsparticles" instead of "@tsparticles/engine"
+// IMPORTANT: Import loadFull from "tsparticles" (not from "@tsparticles/engine")
 import { loadFull } from "tsparticles";
 
 export default function BubbleBackground() {
   const particlesInit = useCallback(async (engine: Engine) => {
-    // Use loadFull from "tsparticles"
     await loadFull(engine);
   }, []);
 
   const particlesLoaded = useCallback(async (container: Container | undefined) => {
-    // Optional: perform any action after particles have loaded
+    // Optional: perform actions after particles load
   }, []);
 
   return (
