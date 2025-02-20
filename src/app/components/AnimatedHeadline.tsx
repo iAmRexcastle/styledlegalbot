@@ -4,29 +4,15 @@ import React from "react";
 
 export default function AnimatedHeadline() {
   return (
-    <div className="animate-fade-down my-4 px-4 sm:px-8">
+    <div className="animate-fade-down my-4">
+      {/* Headline: 2.75rem on mobile, 3.5rem on larger screens; line-height 1 on mobile */}
       <h1
-        className="animated-gradient-headline text-left sm:text-center"
-        style={{
-          fontSize: "3.5rem", // Desktop size; mobile will use a utility class override (e.g. text-[3rem])
-          lineHeight: 1.2,
-          marginTop: "0.5rem",
-          marginBottom: "0.5rem",
-          fontWeight: 900,
-          fontFamily: "'Montserrat', sans-serif",
-        }}
+        className="animated-gradient-headline text-[2.75rem] sm:text-[3.5rem] leading-[1] font-[900] font-[Montserrat] mt-2 mb-2"
       >
         Your AI Claims Assistant
       </h1>
       <h2
-        className="animated-subhead text-left sm:text-center"
-        style={{
-          fontSize: "1.2rem",
-          marginTop: "0.25rem",
-          marginBottom: "1rem",
-          fontWeight: 700,
-          fontFamily: "'Montserrat', sans-serif",
-        }}
+        className="animated-subhead text-[1rem] sm:text-[1.2rem] leading-[1.4] font-[700] font-[Montserrat] mt-1 mb-4"
       >
         Maximize your compensation with our advanced claims tool.
       </h2>
