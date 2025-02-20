@@ -1,0 +1,128 @@
+// prisma/schema.prisma
+
+// Datasource configuration – change the provider and DATABASE_URL as needed.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Generator for the Prisma Client.
+generator client {
+  provider = "prisma-client-js"
+  // Optionally, customize the output directory:
+  // output   = "./generated/prisma-client"
+}
+
+/// Enum for different types of tracking events.
+enum TrackingEventType {
+  ADD_PAYMENT_INFO
+  ADD_TO_CART
+  ADD_TO_WISHLIST
+  COMPLETE_REGISTRATION
+  CONTACT
+  CUSTOMIZE_PRODUCT
+  DONATE
+  FIND_LOCATION
+  INITIATE_CHECKOUT
+  LEAD
+  PURCHASE
+  SCHEDULE
+  SEARCH
+  START_TRIAL
+  SUBMIT_APPLICATION
+  SUBSCRIBE
+  VIEW_CONTENT
+}
+
+/// Represents a platform (for example, a website or app) where campaigns run.
+model Platform {
+  id             Int              @id @default(autoincrement())
+  name           String
+  // Relations
+  campaigns      Campaign[]       @relation("PlatformCampaigns")
+  trackingEvents TrackingEvent[]  @relation("PlatformTrackingEvents")
+  analytics      AnalyticsEvent[]
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@map("platforms") // Map the model to the "platforms" table in your DB.
+}
+
+/// Represents a marketing campaign on a platform.
+model Campaign {
+  id             Int              @id @default(autoincrement())
+  name           String
+
+  // Foreign key and relation to Platform.
+  platformId     Int
+  platform       Platform         @relation("PlatformCampaigns", fields: [platformId], references: [id])
+
+  // One-to-many relations.
+  ads            Ad[]             @relation("CampaignAds")
+  trackingEvents TrackingEvent[]  @relation("CampaignTrackingEvents")
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@map("campaigns")
+}
+
+/// Represents an advertisement within a campaign.
+model Ad {
+  id         Int             @id @default(autoincrement())
+  name       String?         // Optional name
+
+  // Foreign key and relation to Campaign.
+  campaignId Int
+  campaign   Campaign        @relation("CampaignAds", fields: [campaignId], references: [id])
+
+  // One-to-many relation to tracking events.
+  trackingEvents TrackingEvent[] @relation("AdTrackingEvents")
+
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@map("ads")
+}
+
+/// Records a tracking event (for example, a click or conversion) with optional associations.
+model TrackingEvent {
+  id          Int              @id @default(autoincrement())
+  eventType   TrackingEventType
+  eventTime   DateTime         @default(now())
+
+  // Optional fields for monetary value, content IDs, etc.
+  currency    String?
+  value       Float?
+  contentIds  String[]         @default([])
+  contents    Json?
+  contentType String?
+
+  // Optional foreign keys for associating the event with a Platform, Campaign, or Ad.
+  platformId  Int?
+  platform    Platform?        @relation("PlatformTrackingEvents", fields: [platformId], references: [id])
+  
+  campaignId  Int?
+  campaign    Campaign?        @relation("CampaignTrackingEvents", fields: [campaignId], references: [id])
+  
+  adId        Int?
+  ad          Ad?              @relation("AdTrackingEvents", fields: [adId], references: [id])
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@map("tracking_events")
+}
+
+/// Stores analytics events for further analysis.
+model AnalyticsEvent {
+  id         Int      @id @default(autoincrement())
+  platformId Int
+  platform   Platform @relation(fields: [platformId], references: [id])
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("analytics_events")
+}

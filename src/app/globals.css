@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- Base Styles ---------- */
+@layer base {
+  /* Ensure root elements and Next.js container are transparent and fill the viewport */
+  html, body, #__next {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: transparent !important;
+  }
+  body {
+    @apply text-white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  .attorney-ad {
+    text-align: center;
+    color: #ccc;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* ---------- Component Styles ---------- */
+@layer components {
+  /* Glass-morphism for buttons */
+  .glass-box {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(3.5px);
+    -webkit-backdrop-filter: blur(3.5px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    padding: 1rem 2.5rem;
+    min-width: 9rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #fff;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .glass-box:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px 2px #00e5ff;
+  }
+}
+
+/* ---------- Utility Styles ---------- */
+@layer utilities {
+  /* Full-page animated gradient background (dark blue palette) */
+  .gradient-background {
+    background: linear-gradient(
+      270deg,
+      #16255E,
+      #010F42,
+      #202C57,
+      #1C1F2B,
+      #0E1633
+    );
+    background-size: 800% 800%;
+    animation: gradient-animation 30s ease-in-out infinite;
+  }
+  @keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    25% { background-position: 25% 50%; }
+    50% { background-position: 50% 50%; }
+    75% { background-position: 75% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Animated gradient text for headlines cycling through 5 colors */
+  @property --color-1 {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: #62C370;
+  }
+  @property --color-2 {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: #BFDBF7;
+  }
+  .animated-gradient-headline {
+    background: linear-gradient(to right, var(--color-1), var(--color-2));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: headline-gradient-cycle 10s linear infinite;
+  }
+  @keyframes headline-gradient-cycle {
+    0% {
+      --color-1: #62C370;
+      --color-2: #BFDBF7;
+    }
+    25% {
+      --color-1: #BFDBF7;
+      --color-2: #E1E5F2;
+    }
+    50% {
+      --color-1: #E1E5F2;
+      --color-2: #FFFFFF;
+    }
+    75% {
+      --color-1: #FFFFFF;
+      --color-2: #D68C45;
+    }
+    100% {
+      --color-1: #D68C45;
+      --color-2: #62C370;
+    }
+  }
+
+  /* Fade animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-down {
+    animation: fadeDown 1s ease-out forwards;
+  }
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  .animate-fade-out {
+    animation: fadeOut 2.5s ease-in-out forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .animate-fade-in {
+    animation: fadeIn 2s ease-linear forwards;
+  }
+}
+
+/* ---------- Logo Animation ---------- */
+@keyframes pulseLogo {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.pulse-logo {
+  animation: pulseLogo 3s infinite ease-in-out;
+}
