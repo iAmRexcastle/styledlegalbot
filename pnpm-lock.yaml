@@ -38,6 +38,12 @@ importers:
       '@toolhouseai/sdk':
         specifier: ^1.1.5
         version: 1.1.5(react@18.3.1)(sswr@2.1.0(svelte@5.20.1))(svelte@5.20.1)(vue@3.5.13(typescript@5.7.3))
+      '@tsparticles/engine':
+        specifier: ^3.8.1
+        version: 3.8.1
+      '@tsparticles/react':
+        specifier: ^3.0.0
+        version: 3.0.0(@tsparticles/engine@3.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@vercel/speed-insights':
         specifier: ^1.2.0
         version: 1.2.0(next@14.2.24(@babel/core@7.26.9)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(svelte@5.20.1)(vue@3.5.13(typescript@5.7.3))
@@ -2019,6 +2025,13 @@ packages:
 
   '@tsparticles/plugin-rgb-color@3.8.1':
     resolution: {integrity: sha512-xNLqnaFUYjU+7dCHQXjZdM4UojUAVorPVmXlYmkh1xmujLljEaFTwCg1UJVlNq+fXENIFkeaf3/XT0U/q0ZBTA==}
+
+  '@tsparticles/react@3.0.0':
+    resolution: {integrity: sha512-hjGEtTT1cwv6BcjL+GcVgH++KYs52bIuQGW3PWv7z3tMa8g0bd6RI/vWSLj7p//NZ3uTjEIeilYIUPBh7Jfq/Q==}
+    peerDependencies:
+      '@tsparticles/engine': ^3.0.2
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   '@tsparticles/shape-circle@3.8.1':
     resolution: {integrity: sha512-dM/f+qcpd8/KfviuVuKiTS8KLDE/T7xxHK7EI2S49yPW6yrJJBXdL7T4N9/n/6PF+Wslcl+kf/eTDjEAI3WjNQ==}
@@ -6723,6 +6736,12 @@ snapshots:
   '@tsparticles/plugin-rgb-color@3.8.1':
     dependencies:
       '@tsparticles/engine': 3.8.1
+
+  '@tsparticles/react@3.0.0(@tsparticles/engine@3.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@tsparticles/engine': 3.8.1
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
 
   '@tsparticles/shape-circle@3.8.1':
     dependencies:
