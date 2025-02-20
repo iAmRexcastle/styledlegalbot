@@ -1,5 +1,5 @@
 import path from 'path';
-import { withSentryConfig } from '@sentry/nextjs';
+// (import removed)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
