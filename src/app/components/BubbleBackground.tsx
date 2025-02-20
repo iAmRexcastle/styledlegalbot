@@ -4,7 +4,7 @@
 
 import { useCallback } from "react";
 import Particles from "@tsparticles/react";
-import { Engine, Container } from "@tsparticles/engine";
+import type { Engine, Container } from "@tsparticles/engine";
 // IMPORTANT: Import loadFull from "tsparticles" instead of "@tsparticles/engine"
 import { loadFull } from "tsparticles";
 
@@ -15,7 +15,7 @@ export default function BubbleBackground() {
   }, []);
 
   const particlesLoaded = useCallback(async (container: Container | undefined) => {
-    // Optional: do something after particles load
+    // Optional: perform any action after particles have loaded
   }, []);
 
   return (
@@ -41,10 +41,7 @@ export default function BubbleBackground() {
           },
         },
         interactivity: {
-          events: {
-            onHover: { enable: true, mode: "repulse" },
-            resize: true,
-          },
+          events: { onHover: { enable: true, mode: "repulse" }, resize: true },
         },
         detectRetina: true,
       }}
