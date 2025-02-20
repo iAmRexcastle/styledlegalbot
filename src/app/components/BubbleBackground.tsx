@@ -1,17 +1,21 @@
+// src/app/components/BubbleBackground.tsx
+
 "use client";
 
 import { useCallback } from "react";
 import Particles from "@tsparticles/react";
-import { loadFull } from "@tsparticles/engine";
-import type { Engine, Container } from "@tsparticles/engine";
+import { Engine, Container } from "@tsparticles/engine";
+// IMPORTANT: Import loadFull from "tsparticles" instead of "@tsparticles/engine"
+import { loadFull } from "tsparticles";
 
 export default function BubbleBackground() {
   const particlesInit = useCallback(async (engine: Engine) => {
+    // Use loadFull from "tsparticles"
     await loadFull(engine);
   }, []);
 
   const particlesLoaded = useCallback(async (container: Container | undefined) => {
-    // Optional: log container for debugging
+    // Optional: do something after particles load
   }, []);
 
   return (
@@ -29,10 +33,18 @@ export default function BubbleBackground() {
           shape: { type: "circle" },
           opacity: { value: 0.8 },
           size: { value: { min: 3, max: 8 } },
-          move: { enable: true, speed: 1.8, direction: "none", outModes: { default: "out" } },
+          move: {
+            enable: true,
+            speed: 1.8,
+            direction: "none",
+            outModes: { default: "out" },
+          },
         },
         interactivity: {
-          events: { onHover: { enable: true, mode: "repulse" }, resize: true },
+          events: {
+            onHover: { enable: true, mode: "repulse" },
+            resize: true,
+          },
         },
         detectRetina: true,
       }}

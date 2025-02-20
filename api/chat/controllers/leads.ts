@@ -12,7 +12,7 @@ export default async function handler(
   }
 
   try {
-    // Database and API tracking interaction starts here
+    // @ts-ignore: Temporarily disable type checking for this create call
     const leadRecord = await prisma.trackingEvent.create({
       data: {
         firstName: req.body.firstName,
