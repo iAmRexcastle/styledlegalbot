@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Transition } from "@headlessui/react";
@@ -8,15 +8,71 @@ import Logo from "@/app/Logo.svg";
 import AnimatedHeadline from "@/app/components/AnimatedHeadline";
 import AnimatedGradientBackground from "@/app/components/AnimatedGradientBackground";
 
-interface FormData {
-  ownerType: string;
-  propertyDamage: string;
-  injuredStatus: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  tcpaConsent: boolean;
+// New component to simulate streaming GPT-based summary text
+function SummaryStep({ formData, onComplete }: { formData: any; onComplete: () => void }) {
+  const [summary, setSummary] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Build a prompt using collected information
+    const prompt = `Please summarize the following details in a professional tone for a fire claim: 
+Owner Type: ${formData.ownerType}, 
+Damage: ${formData.propertyDamage.replace("_", " ")}, 
+Injury Status: ${formData.injuredStatus}. 
+Address the homeowner by their first name, ${formData.firstName}. 
+Explain why understanding their claim value is critical to maximizing compensation for their loss.`;
+
+    // Simulate streaming text (replace this with actual AI SDK stream call)
+    // For example, you might use:
+    // streamText(prompt, { onChunk, onComplete })
+    let simulatedResponse = "";
+    const chunks = [
+      "Thank you, " + formData.firstName + ". ",
+      "Based on your selections as a " + formData.ownerType.toLowerCase() + " with " + formData.propertyDamage.replace("_", " ").toLowerCase() + ", ",
+      "it is very important to accurately assess your fire claim. ",
+      "Understanding your claim value ensures you receive the maximum compensation for your loss. ",
+      "Our advanced claims tool will now calculate your claim value and help you secure the best possible payout."
+    ];
+    let index = 0;
+    const interval = setInterval(() => {
+      simulatedResponse += chunks[index];
+      setSummary(simulatedResponse);
+      index++;
+      if (index === chunks.length) {
+        clearInterval(interval);
+        setLoading(false);
+        onComplete();
+      }
+    }, 500); // 500ms per chunk (adjust for desired speed)
+  }, [formData, onComplete]);
+
+  return (
+    <div className="form-step font-normal">
+      <h2 className="text-xl font-bold mb-4">Summary</h2>
+      <div className="mb-4 text-center">
+        {loading ? (
+          <p className="text-lg">Generating summary...</p>
+        ) : (
+          <p className="text-lg">{summary}</p>
+        )}
+      </div>
+      <div className="text-center">
+        <button
+          type="button"
+          onClick={() => {}}
+          className="glass-box"
+          style={{ padding: "0.75rem", fontSize: "1rem" }}
+        >
+          Proceed
+        </button>
+        <div className="mt-2">
+          <button type="button" onClick={() => {}} className="text-blue-600 underline">
+            Back
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const stepVariants = {
@@ -26,9 +82,10 @@ const stepVariants = {
 };
 
 export default function LandingPage() {
-  const totalSteps = 4;
+  // totalSteps: 0=Owner, 1=Damage, 2=Injury, 3=Name, 4=Summary, 5=Contact
+  const totalSteps = 6;
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState({
     ownerType: "",
     propertyDamage: "",
     injuredStatus: "",
@@ -48,7 +105,7 @@ export default function LandingPage() {
     setCurrentStep((prev) => Math.max(prev - 1, 0));
   };
 
-  const handleOptionClick = (field: keyof FormData, value: string) => {
+  const handleOptionClick = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     nextStep();
   };
@@ -65,7 +122,7 @@ export default function LandingPage() {
     e.preventDefault();
     console.log("Form submitted:", formData);
     setSubmitted(true);
-    // Optionally, send formData to your API endpoint here.
+    // Optionally send formData to your API endpoint here.
   };
 
   return (
@@ -73,7 +130,7 @@ export default function LandingPage() {
       {/* Animated Gradient Background */}
       <AnimatedGradientBackground />
 
-      {/* Conditionally render header with logo only if not on the final step */}
+      {/* Render header with logo only for steps 0-2 (not during name, summary, or contact) */}
       {currentStep < 3 && (
         <header className="flex flex-col items-center">
           <p className="attorney-ad">Legal Advertisement</p>
@@ -88,11 +145,10 @@ export default function LandingPage() {
         <AnimatedHeadline />
       </section>
 
-      {/* Bottom Section: Multi-Step Form */}
+      {/* Bottom Section: Multi-Step Form inside Glass Container */}
       <footer className="w-full flex flex-col items-center mb-12">
         {!submitted ? (
-          // Added the glass-container class here for glass morphism effect on the form.
-          <div className="glass-container w-full max-w-md mx-auto">
+          <div className="w-full max-w-md mx-auto glass-container">
             {/* Progress Bar */}
             <div className="mb-4">
               <div className="h-2 bg-gray-300 rounded-full">
@@ -202,11 +258,7 @@ export default function LandingPage() {
                       </button>
                     </div>
                     <div className="mt-4 text-center">
-                      <button
-                        type="button"
-                        onClick={prevStep}
-                        className="text-blue-600 underline"
-                      >
+                      <button type="button" onClick={prevStep} className="text-blue-600 underline">
                         Back
                       </button>
                     </div>
@@ -243,11 +295,7 @@ export default function LandingPage() {
                       </button>
                     </div>
                     <div className="mt-4 text-center">
-                      <button
-                        type="button"
-                        onClick={prevStep}
-                        className="text-blue-600 underline"
-                      >
+                      <button type="button" onClick={prevStep} className="text-blue-600 underline">
                         Back
                       </button>
                     </div>
@@ -264,28 +312,65 @@ export default function LandingPage() {
                     transition={{ duration: 0.5 }}
                     className="form-step"
                   >
+                    <h2 className="text-xl font-bold mb-4">Enter your name</h2>
+                    <div className="flex gap-4 mb-4">
+                      <input
+                        type="text"
+                        name="firstName"
+                        placeholder="First Name"
+                        required
+                        className="w-1/2 p-2 border rounded"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                      />
+                      <input
+                        type="text"
+                        name="lastName"
+                        placeholder="Last Name"
+                        required
+                        className="w-1/2 p-2 border rounded"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    {/* Removed the customization text */}
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={nextStep}
+                        className="glass-box"
+                        style={{ padding: "0.75rem", fontSize: "1rem" }}
+                      >
+                        Proceed
+                      </button>
+                      <div className="mt-2">
+                        <button type="button" onClick={prevStep} className="text-blue-600 underline">
+                          Back
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {currentStep === 4 && (
+                  <SummaryStep
+                    formData={formData}
+                    onComplete={() => {}}
+                  />
+                )}
+
+                {currentStep === 5 && (
+                  <motion.div
+                    key="step-6"
+                    variants={stepVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: 0.5 }}
+                    className="form-step font-normal"
+                  >
                     <h2 className="text-xl font-bold mb-4">How can we contact you?</h2>
                     <div className="space-y-4">
-                      <div className="flex gap-4">
-                        <input
-                          type="text"
-                          name="firstName"
-                          placeholder="First Name"
-                          required
-                          className="w-1/2 p-2 border rounded"
-                          value={formData.firstName}
-                          onChange={handleInputChange}
-                        />
-                        <input
-                          type="text"
-                          name="lastName"
-                          placeholder="Last Name"
-                          required
-                          className="w-1/2 p-2 border rounded"
-                          value={formData.lastName}
-                          onChange={handleInputChange}
-                        />
-                      </div>
                       <div className="flex gap-4">
                         <input
                           type="email"
@@ -321,11 +406,7 @@ export default function LandingPage() {
                       </div>
                     </div>
                     <div className="mt-4 flex justify-between">
-                      <button
-                        type="button"
-                        onClick={prevStep}
-                        className="text-blue-600 underline"
-                      >
+                      <button type="button" onClick={prevStep} className="text-blue-600 underline">
                         Back
                       </button>
                       <button

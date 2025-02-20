@@ -32,7 +32,8 @@
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(3.5px);
     -webkit-backdrop-filter: blur(3.5px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    /* Removed border for a cleaner look */
+    border: none;
     border-radius: 8px;
     padding: 1rem 2.5rem;
     min-width: 9rem;
@@ -49,7 +50,7 @@
     box-shadow: 0 0 10px 2px #00e5ff;
   }
 
-  /* Glass container for multi-step forms – no border and darker background */
+  /* Glass container for the multi-step form (darker translucent background, no border) */
   .glass-container {
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(5px);
@@ -59,11 +60,20 @@
     padding: 1.5rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
+
+  /* Input styling inside glass container for readability */
+  .glass-container input {
+    color: #000;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.5rem;
+  }
 }
 
 /* ---------- Utility Styles ---------- */
 @layer utilities {
-  /* Full-page animated gradient background (dark blue palette) */
+  /* Multi-stop animated gradient background using your provided colors for background */
   .gradient-background {
     background: linear-gradient(
       270deg,
@@ -85,7 +95,7 @@
     100% { background-position: 0% 50%; }
   }
 
-  /* Animated gradient text for headlines cycling through professional tech colors */
+  /* Animated gradient text for headlines cycling through professional neon colors without pink/purple undertones */
   @property --color-1 {
     syntax: "<color>";
     inherits: false;
@@ -103,26 +113,26 @@
     -webkit-text-fill-color: transparent;
     color: transparent;
     animation: headline-gradient-cycle 10s linear infinite;
-    /* Use a subtle text stroke for enhanced readability */
+    /* Subtle text stroke for improved readability */
     -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.4);
     text-stroke: 0.5px rgba(0, 0, 0, 0.4);
   }
   @keyframes headline-gradient-cycle {
     0% {
-      --color-1: #00e5ff;  /* Cyan */
-      --color-2: #00ff00;  /* Green */
+      --color-1: #00e5ff;
+      --color-2: #00ff00;
     }
     25% {
-      --color-1: #00ff00;  /* Green */
-      --color-2: #00d1b2;  /* Teal */
+      --color-1: #00ff00;
+      --color-2: #00d1b2;
     }
     50% {
-      --color-1: #00d1b2;  /* Teal */
-      --color-2: #00aaff;  /* Blue */
+      --color-1: #00d1b2;
+      --color-2: #00aaff;
     }
     75% {
-      --color-1: #00aaff;  /* Blue */
-      --color-2: #00e5ff;  /* Cyan */
+      --color-1: #00aaff;
+      --color-2: #00e5ff;
     }
     100% {
       --color-1: #00e5ff;
@@ -165,17 +175,15 @@
 
 /* ---------- Mobile Adjustments ---------- */
 @media (max-width: 640px) {
-  /* Reduce margin between logo and headline on mobile */
   .attorney-ad {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
   }
-  /* Adjust AnimatedHeadline margins and font size on mobile */
   .animated-gradient-headline {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
     text-align: center;
-    font-size: 2.75rem; /* Mobile headline size */
+    font-size: 2.75rem;
     line-height: 1;
   }
   .animated-subhead {
