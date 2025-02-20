@@ -4,28 +4,32 @@ import React from "react";
 
 export default function AnimatedHeadline() {
   return (
-    <div className="text-center">
+    <div className="animate-fade-down my-4">
       <h1
-        className="animated-gradient-headline"
+        className="animated-gradient-headline text-left sm:text-center"
         style={{
-          fontFamily: "'BarlowCondensed-Black', sans-serif",
-          fontSize: "2.5rem",
-          lineHeight: "3.2rem",
-          letterSpacing: "0.12rem",
+          fontSize: "3.5rem", // Fixed at 3.5rem (~56px)
+          lineHeight: 1.2,
+          marginTop: "0.5rem", // Reduced margin above headline
+          marginBottom: "0.5rem",
+          fontWeight: 900,
+          fontFamily: "'Montserrat', sans-serif",
         }}
       >
-        AI: A Game Changer for Wildfire Compensation
+        Your AI Claims Assistant
       </h1>
-      <p
-        className="animated-subhead"
+      <h2
+        className="animated-subhead text-left sm:text-center"
         style={{
-          fontFamily: "'BarlowCondensed-MediumItalic', sans-serif",
-          fontSize: "1.67rem",
-          marginBottom: "10%",
+          fontSize: "1.2rem", // Increased subhead size
+          marginTop: "0.25rem",
+          marginBottom: "1rem",
+          fontWeight: 700,
+          fontFamily: "'Montserrat', sans-serif",
         }}
       >
-        🔥 Maximize your payout with a quick, AI-driven claim estimate.
-      </p>
+        Maximize your compensation with our advanced claims tool.
+      </h2>
     </div>
   );
 }

@@ -1,28 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Quattrocento+Sans:wght@400;700&family=Poppins:wght@400;500;700&display=swap');
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-/* --- Animated Gradient Text Variables & Keyframes --- */
+/* Optional animated gradient text effect for headlines */
 @property --color-1 {
   syntax: "<color>";
   inherits: false;
   initial-value: hsl(98, 100%, 62%);
 }
-
 @property --color-2 {
   syntax: "<color>";
   inherits: false;
   initial-value: hsl(204, 100%, 59%);
 }
-
 @keyframes gradient-change {
   to {
     --color-1: hsl(210, 100%, 59%);
     --color-2: hsl(310, 100%, 59%);
   }
 }
-
-/* Animated gradient text effect for headline */
 .animated-gradient-headline {
   animation: gradient-change 5s linear infinite alternate;
   background: linear-gradient(to right, var(--color-1), var(--color-2));
@@ -32,189 +29,114 @@
   color: transparent;
 }
 
-/* Animated gradient text effect for subhead (if desired, currently applied to headline only) */
-.animated-gradient-subhead {
-  /* Uncomment if you want a gradient on the subhead:
-  animation: gradient-change 5s linear infinite alternate;
-  background: linear-gradient(to right, var(--color-1), var(--color-2));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  */
-}
-
-/* --- Custom Fonts --- */
-@font-face {
-  font-family: 'Montserrat ExtraBold';
-  src: url('/src/fonts/Montserrat-ExtraBold.ttf') format('truetype');
-  font-weight: 800;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'BarlowCondensed-Black';
-  src: url('/src/fonts/BarlowCondensed-Black.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'BarlowCondensed-MediumItalic';
-  src: url('/src/fonts/BarlowCondensed-MediumItalic.ttf') format('truetype');
-  font-weight: 500;
-  font-style: italic;
-}
-
-/* --- Root Variables & Typography --- */
+/* Root Variables & Typography */
 :root {
-  --headline-font: 'BarlowCondensed-Black', sans-serif;
-  --subhead-font: 'BarlowCondensed-MediumItalic', sans-serif;
-  --body-font: 'Montserrat', sans-serif;
+  --headline-font: 'Quattrocento Sans', sans-serif; /* Headlines & questions */
+  --body-font: 'Poppins', sans-serif;                /* Body & button text */
   --attorney-text-color: #777777;
 }
 
-/* --- Base Styles --- */
+/* Base Styles */
 @layer base {
   body {
-    @apply bg-black text-white;
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: #fff;
     font-family: var(--body-font);
     font-size: 1rem;
     line-height: 1.6;
   }
 
-  /* Attorney Advertisement */
   .attorney-ad {
-    margin-top: 0;
-    padding-bottom: 1.5rem; /* ~10% padding might be too much on small devices—use rem for consistency */
-    font-size: 0.875rem; /* ~14px */
+    font-size: 0.875rem;
     text-align: center;
     color: var(--attorney-text-color);
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
   }
 
-  /* Animated Headline */
+  /* Headline & Subhead used in AnimatedHeadline */
   .animated-headline {
     font-family: var(--headline-font);
-    font-size: 2.5rem;
-    line-height: 3.2rem;
-    letter-spacing: 0.12rem;
+    font-weight: 900;
     text-align: center;
-    margin: 0 auto;
+    margin-bottom: 0.5rem;
   }
-
-  /* Animated Subhead */
   .animated-subhead {
-    font-family: var(--subhead-font);
-    font-size: 1.67rem;
+    font-family: var(--headline-font);
+    font-weight: 700;
+    font-size: 1rem;
     text-align: center;
-    margin: 2.5rem 0;  /* 2.5% top and bottom (using rem for consistency) */
-    line-height: 1rem;
+    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
   }
 
-  /* Emoji Paragraph */
-  .emoji-paragraph {
-    margin: 1rem 0;
-    font-size: 3em;
-    text-align: center;
-  }
-
-  /* Quiz Question / Emphasis Text */
   .quiz-question {
-    font-family: 'Montserrat ExtraBold', sans-serif;
-    font-size: 1.1rem;
+    font-family: var(--body-font);
+    font-weight: 600;
+    font-size: 1.5rem;
+    line-height: 1.2;
     text-align: center;
-    margin: 1rem 0;
+    margin: 0.75rem 0;
   }
 }
 
-/* --- Animated Gradient Background --- */
-@layer utilities {
-  .gradient-background {
-    background: linear-gradient(163deg, #070017, #1e0861, #17102d, #4b008e);
-    background-size: 240% 240%;
-    animation: gradient-animation 8s ease infinite;
-    min-height: 100vh;
-  }
-  
-  @keyframes gradient-animation {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-}
-
-/* --- Glass-Morphism for Option Cards --- */
+/* Glass Buttons with Neon Hover */
 @layer components {
   .glass-box {
-    padding: 1rem;         /* Using rem instead of percentage for consistency */
-    margin: 1.5rem 0;
-    width: 90%;
-    min-width: 30%;
-    border-radius: 10px;
     background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     backdrop-filter: blur(3.5px);
     -webkit-backdrop-filter: blur(3.5px);
     border: 1px solid rgba(255, 255, 255, 0.18);
-    font-family: 'Montserrat ExtraBold', sans-serif;
-    font-size: 1.25rem;
+    border-radius: 8px;
+    padding: 1rem 2.5rem;
+    min-width: 9rem;
+    font-family: var(--body-font);
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #fff;
     text-align: center;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
-  
   .glass-box:hover {
     transform: scale(1.05);
+    box-shadow: 0 0 10px 2px #00e5ff;
   }
 }
 
-/* --- Animation Utilities --- */
+/* Logo Pulse Animation */
+@keyframes pulseLogo {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.pulse-logo {
+  animation: pulseLogo 2.5s infinite ease-in-out;
+}
+
+/* Animation Utilities */
 @layer utilities {
   @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-20px); }
+    from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  
   .animate-fade-down {
-    animation: fadeDown 1s ease-out forwards;
+    animation: fadeDown 0.8s ease-out forwards;
   }
-  
-  .animate-delay-1000 {
-    animation-delay: 1s;
-  }
-  
   @keyframes fadeOut {
     from { opacity: 1; }
     to { opacity: 0; }
   }
-  
+  .animate-fade-out {
+    animation: fadeOut 1s ease-in-out forwards;
+  }
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
   }
-  
-  .animate-fade-out {
-    animation: fadeOut 2.5s ease-in-out forwards;
-  }
-  
   .animate-fade-in {
-    animation: fadeIn 2s ease-linear forwards;
-  }
-}
-
-/* --- Responsive Container Padding --- */
-@layer utilities {
-  .container {
-    padding: 14px; /* Mobile */
-  }
-  @media (min-width: 600px) {
-    .container {
-      padding: 20px; /* Tablet */
-    }
-  }
-  @media (min-width: 900px) {
-    .container {
-      padding: 24px; /* Desktop */
-    }
+    animation: fadeIn 1s ease-linear forwards;
   }
 }

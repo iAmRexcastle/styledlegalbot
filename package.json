@@ -20,6 +20,8 @@
     "@sentry/nextjs": "^8.55.0",
     "@tailwindcss/postcss": "^4.0.6",
     "@toolhouseai/sdk": "^1.1.5",
+    "@tsparticles/engine": "^3.8.1",
+    "@tsparticles/react": "^3.0.0",
     "@vercel/speed-insights": "^1.2.0",
     "ai": "^3.4.33",
     "chalk": "^5.4.1",

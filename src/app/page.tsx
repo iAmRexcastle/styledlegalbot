@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Logo from "@/app/Logo.svg";
 import AnimatedHeadline from "@/app/components/AnimatedHeadline";
+import BubbleBackground from "@/app/components/BubbleBackground";
 
 export default function LandingPage() {
   const [animateClass, setAnimateClass] = useState("");
@@ -14,71 +15,73 @@ export default function LandingPage() {
     setTimeout(() => {
       setSelectedOption(option);
       console.log("Selected option:", option);
-      // Proceed to next funnel step
       setAnimateClass("animate-fade-in");
-    }, 2500);
+    }, 1000);
   };
 
   return (
-    <div className="gradient-background min-h-screen w-full flex flex-col overflow-hidden">
-      {/* Header Section for Attorney Advertisement */}
-      <header className="w-full text-center" style={{ marginTop: "1rem" }}>
-        <p className="attorney-ad" style={{ fontSize: "1rem", color: "#777777" }}>
-          Legal Advertisement
-        </p>
+    <main className="relative w-full h-screen flex flex-col justify-between">
+      {/* Bubble Background */}
+      <BubbleBackground />
+
+      {/* Top Section: Attorney Advertisement & Logo */}
+      <header className="flex flex-col items-center">
+        <p className="attorney-ad">Legal Advertisement</p>
+        <div className="animate-fade-down mt-2 mb-4"> {/* Reduced margin below logo */}
+          <Image
+            src={Logo}
+            alt="Logo"
+            width={100}
+            height={100}
+            className="pulse-logo"
+          />
+        </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex flex-col items-center justify-center flex-grow px-[1%]">
-        <div className="container w-full max-w-xl mx-auto text-center">
-          {/* Logo */}
-          <div className="flex justify-center animate-fade-down" style={{ marginTop: "2.5%", marginBottom: "5%" }}>
-            <Image src={Logo} alt="Logo" width={100} height={100} />
-          </div>
+      {/* Middle Section: Animated Headline & Subhead */}
+      <section className="flex flex-col items-center flex-grow justify-center">
+        <AnimatedHeadline />
+      </section>
 
-          {/* Animated Headline & Subhead */}
-          <AnimatedHeadline />
-
-          {/* Key Emoji */}
-          <p
-            className="emoji-paragraph animate-fade-down animate-delay-1000"
-            style={{ fontSize: "3em" }}
+      {/* Bottom Section: Quiz Question & Option Buttons */}
+      <footer className="w-full flex flex-col items-center mb-12">
+        <p
+          className="quiz-question animate-fade-down mb-4"
+          style={{
+            fontFamily: "'Poppins', sans-serif",
+            fontWeight: 600,
+            fontSize: "1.5rem",
+          }}
+        >
+          Injured In Eaton Fires?
+        </p>
+        <div className="flex gap-4">
+          <button
+            onClick={() => handleBoxClick("Yes")}
+            className={`glass-box ${animateClass}`}
+            style={{
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: 700,
+              fontSize: "1.3rem", // Increased button text size
+            }}
           >
-            🔑
-          </p>
-
-          {/* Quiz Question */}
-          <p className="quiz-question animate-fade-down animate-delay-1000">
-            <span style={{ fontFamily: "'Montserrat ExtraBold', sans-serif", fontSize: "1.1rem" }}>
-              Were You Injured In The Eaton Fire?
-            </span>
-          </p>
-
-          {/* Option Buttons */}
-          <div className="flex flex-row justify-center gap-6 mt-4" style={{ marginBottom: "25%" }}>
-            <button
-              onClick={() => handleBoxClick("Yes")}
-              className={`glass-box ${animateClass}`}
-              style={{
-                fontFamily: "'Montserrat ExtraBold', sans-serif",
-                fontSize: "1.25rem",
-              }}
-            >
-              Yes
-            </button>
-            <button
-              onClick={() => handleBoxClick("No")}
-              className={`glass-box ${animateClass}`}
-              style={{
-                fontFamily: "'Montserrat ExtraBold', sans-serif",
-                fontSize: "1.25rem",
-              }}
-            >
-              No
-            </button>
-          </div>
+            <span className="mr-2">🤕</span>Yes
+          </button>
+          <button
+            onClick={() => handleBoxClick("No")}
+            className={`glass-box ${animateClass}`}
+            style={{
+              fontFamily: "'Poppins', sans-serif",
+              fontWeight: 700,
+              fontSize: "1.3rem", // Increased button text size
+            }}
+          >
+            <span className="mr-2">🙅</span>No
+          </button>
         </div>
-      </main>
-    </div>
+        {/* Increased margin beneath the buttons */}
+        <div className="mt-16"></div>
+      </footer>
+    </main>
   );
 }
