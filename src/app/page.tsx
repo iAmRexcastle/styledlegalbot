@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Logo from "@/app/Logo.svg";
 import AnimatedHeadline from "@/app/components/AnimatedHeadline";
-import BubbleBackground from "@/app/components/BubbleBackground";
+import AnimatedGradientBackground from "@/app/components/AnimatedGradientBackground";
 
 export default function LandingPage() {
   const [animateClass, setAnimateClass] = useState("");
@@ -20,14 +20,14 @@ export default function LandingPage() {
   };
 
   return (
-    <main className="relative w-full h-screen flex flex-col justify-between">
-      {/* Bubble Background */}
-      <BubbleBackground />
+    <main className="relative w-full h-screen flex flex-col justify-between bg-transparent overflow-hidden">
+      {/* Full-Page Animated Gradient Background */}
+      <AnimatedGradientBackground />
 
       {/* Top Section: Attorney Advertisement & Logo */}
       <header className="flex flex-col items-center">
         <p className="attorney-ad">Legal Advertisement</p>
-        <div className="animate-fade-down mt-2 mb-4"> {/* Reduced margin below logo */}
+        <div className="animate-fade-down mt-2 mb-4">
           <Image
             src={Logo}
             alt="Logo"
@@ -38,8 +38,8 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Middle Section: Animated Headline & Subhead */}
-      <section className="flex flex-col items-center flex-grow justify-center">
+      {/* Middle Section: Animated Headline & Subhead with mobile padding */}
+      <section className="flex flex-col items-center flex-grow justify-center px-6 sm:px-12 text-center">
         <AnimatedHeadline />
       </section>
 
@@ -62,7 +62,7 @@ export default function LandingPage() {
             style={{
               fontFamily: "'Poppins', sans-serif",
               fontWeight: 700,
-              fontSize: "1.3rem", // Increased button text size
+              fontSize: "1.3rem",
             }}
           >
             <span className="mr-2">🤕</span>Yes
@@ -73,13 +73,12 @@ export default function LandingPage() {
             style={{
               fontFamily: "'Poppins', sans-serif",
               fontWeight: 700,
-              fontSize: "1.3rem", // Increased button text size
+              fontSize: "1.3rem",
             }}
           >
             <span className="mr-2">🙅</span>No
           </button>
         </div>
-        {/* Increased margin beneath the buttons */}
         <div className="mt-16"></div>
       </footer>
     </main>
