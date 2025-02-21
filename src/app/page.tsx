@@ -3,13 +3,21 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Transition } from "@headlessui/react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Logo from "@/app/Logo.svg";
 import AnimatedHeadline from "@/app/components/AnimatedHeadline";
 import AnimatedGradientBackground from "@/app/components/AnimatedGradientBackground";
+
+// Global pulse keyframes (optional – if not defined in your CSS)
+const globalStyles = `
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+`;
 
 // Define our form data interface.
 export interface FormData {
@@ -29,13 +37,6 @@ const stepVariants = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
   exit: { opacity: 0 },
-};
-
-const shakeVariants = {
-  shake: {
-    x: [0, -10, 10, -10, 10, 0],
-    transition: { duration: 0.6 },
-  },
 };
 
 // Zod schema for validating the name fields.
@@ -73,7 +74,10 @@ function formatPhoneNumber(value: string) {
   return value;
 }
 
-// SummaryStep simulates an AI-generated summary with dramatic streaming.
+/**
+ * SummaryStep simulates an AI-generated summary with dramatic streaming.
+ * The "Proceed" button appears 4 seconds after streaming completes.
+ */
 function SummaryStep({
   formData,
   onComplete,
@@ -83,49 +87,68 @@ function SummaryStep({
   onComplete: () => void;
   onBack: () => void;
 }) {
-  useEffect(() => {
-    console.log("SummaryStep received firstName:", formData.firstName);
-  }, [formData.firstName]);
-
-  // Use fallbacks for undefined values.
-  const firstName = formData.firstName?.trim() || "there";
-  const ownerType = formData.ownerType || "unspecified";
-  const propertyDamage = formData.propertyDamage
+  const firstNameVal = formData.firstName ? formData.firstName.trim() : "User";
+  const ownerTypeVal = formData.ownerType || "unspecified";
+  const propertyDamageVal = formData.propertyDamage
     ? formData.propertyDamage.replace("_", " ")
     : "unspecified";
-  const injuredStatus = formData.injuredStatus || "unspecified";
+  const injuredStatusVal =
+    formData.injuredStatus === "injured" ? " and injuries" : "";
 
-  // Updated prompt using firstName twice.
-  const prompt = `Great job ${firstName} for taking the first step. Our advanced AI has begun evaluating your fire claim based on your status as a ${ownerType} facing significant ${propertyDamage}${
-    injuredStatus === "injured" ? " and injuries" : ""
-  }. To deliver an instant, precise estimate tailored to your situation, we simply need a few more details. Please share your contact information so we can complete your evaluation and help you secure the maximum compensation available. Thank you, ${firstName}!`;
+  // Build the prompt from parts to avoid stray "undefined".
+  const promptParts = [
+    "Great job",
+    firstNameVal,
+    "for taking the first step.",
+    "Our advanced AI has begun evaluating your fire claim based on your status as a",
+    ownerTypeVal,
+    "facing significant",
+    propertyDamageVal,
+    injuredStatusVal,
+    ". To deliver an instant, precise estimate tailored to your situation, we simply need a few more details.",
+    "Please share your contact information so we can complete your evaluation and help you secure the maximum compensation available.",
+    "Thank you,",
+    firstNameVal + "!"
+  ];
+  let prompt = promptParts.filter(part => part.trim() !== "").join(" ");
+  prompt = prompt.replace(/undefined/g, "").replace(/\s+/g, " ").trim();
 
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showProceed, setShowProceed] = useState(false);
 
-  // Streaming effect: display the prompt word-by-word with a 119ms delay.
   useEffect(() => {
-    console.log("SummaryStep prompt:", prompt);
-    const words = prompt.trim().split(" ").filter((word) => word && word !== "undefined");
+    const words = prompt.split(" ").filter((w) => w);
     let index = 0;
-    setSummary(""); // reset
+    setSummary("");
     setLoading(true);
     const interval = setInterval(() => {
-      setSummary((prev) => prev + (prev ? " " : "") + words[index]);
-      index++;
-      if (index >= words.length) {
+      if (index < words.length) {
+        setSummary(prev => (prev ? prev + " " + words[index] : words[index]));
+        index++;
+      } else {
         clearInterval(interval);
         setLoading(false);
       }
-    }, 119); // 119ms per word (~15% faster than 140ms)
+    }, 119);
     return () => clearInterval(interval);
   }, [prompt]);
 
-  // Once streaming is complete, render the final summary with dramatic fade-in per word.
+  // Delay showing the Proceed button by 4 seconds after streaming completes.
+  useEffect(() => {
+    if (!loading) {
+      const timer = setTimeout(() => setShowProceed(true), 4000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowProceed(false);
+    }
+  }, [loading]);
+
   const renderFinalSummary = () => {
+    const cleanSummary = summary.replace(/undefined/g, "").trim();
     return (
       <p className="text-lg mb-2">
-        {summary.split(" ").map((word, i) => (
+        {cleanSummary.split(" ").map((word, i) => (
           <motion.span
             key={i}
             initial={{ opacity: 0, y: 10 }}
@@ -149,8 +172,7 @@ function SummaryStep({
       transition={{ duration: 0.5 }}
       className="form-step font-normal"
     >
-      {/* Use custom summary-container for full visibility */}
-      <div className="mb-4 px-4 w-full max-w-4xl mx-auto summary-container text-left flex flex-col justify-center">
+      <div className="mb-4 px-4 w-full max-w-5xl mx-auto summary-container text-left flex flex-col justify-center">
         {loading ? (
           <div className="flex flex-col items-center justify-center space-y-4 py-4 mt-8">
             <div className="w-12 h-12 border-4 border-t-transparent border-gray-500 rounded-full animate-spin"></div>
@@ -161,27 +183,41 @@ function SummaryStep({
         )}
       </div>
       <div className="text-center">
-        <button
-          type="button"
-          onClick={onComplete}
-          className="glass-box"
-          style={{
-            padding: "0.75rem",
-            fontSize: "1rem",
-            fontWeight: "400",
-            background: "rgba(155,155,155,0.2)",
-            boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
-            backdropFilter: "blur(10px)",
-            WebkitBackdropFilter: "blur(10px)",
-            borderRadius: "10px",
-            border: "1px solid rgba(0,0,0,0.6)",
-            color: "#fff",
-          }}
-        >
-          Proceed
-        </button>
+        {showProceed ? (
+          <button
+            type="button"
+            onClick={onComplete}
+            className="w-full py-3 text-lg font-medium sm:min-w-[400px]"
+            style={{
+              background: "rgba(229, 57, 53, 0.65)",
+              boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+              backdropFilter: "blur(2.5px)",
+              WebkitBackdropFilter: "blur(2.5px)",
+              borderRadius: "10px",
+              border: "1px solid rgba(255, 255, 255, 0.18)"
+            }}
+          >
+            Proceed
+          </button>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="w-full py-3 text-lg font-medium opacity-50 cursor-not-allowed sm:min-w-[400px]"
+            style={{
+              background: "rgba(229, 57, 53, 0.65)",
+              boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+              backdropFilter: "blur(2.5px)",
+              WebkitBackdropFilter: "blur(2.5px)",
+              borderRadius: "10px",
+              border: "1px solid rgba(255, 255, 255, 0.18)"
+            }}
+          >
+            Please wait...
+          </button>
+        )}
         <div className="mt-2">
-          <button type="button" onClick={onBack} className="text-blue-600 underline">
+          <button type="button" onClick={onBack} className="text-blue-400 underline">
             Back
           </button>
         </div>
@@ -190,7 +226,10 @@ function SummaryStep({
   );
 }
 
-// NameStep component using react-hook-form.
+/**
+ * NameStep collects the user's first and last name.
+ * On desktop, the inputs appear side by side; on mobile they stack.
+ */
 function NameStep({
   setFormData,
   nextStep,
@@ -206,8 +245,7 @@ function NameStep({
   });
 
   const onNameSubmit = (data: NameFormData) => {
-    console.log("NameStep data:", data);
-    setFormData((prev) => ({ ...prev, ...data }));
+    setFormData(prev => ({ ...prev, ...data }));
     nextStep();
   };
 
@@ -222,35 +260,46 @@ function NameStep({
       className="form-step"
     >
       <h2 className="text-xl font-medium mb-4">Enter your name</h2>
-      <div className="flex flex-col items-center">
-        <div className="flex gap-4 mb-4">
-          <input {...register("firstName")} placeholder="First Name" className="w-1/2 p-2 border rounded" />
-          <input {...register("lastName")} placeholder="Last Name" className="w-1/2 p-2 border rounded" />
-        </div>
-        {errors.firstName && <p className="text-red-500 text-sm mb-2">{errors.firstName.message}</p>}
-        {errors.lastName && <p className="text-red-500 text-sm mb-2">{errors.lastName.message}</p>}
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={handleSubmit(onNameSubmit)}
-            className="glass-box"
-            style={{ padding: "0.75rem", fontSize: "1rem", fontWeight: "400" }}
-          >
-            Proceed
-          </button>
-          <div className="mt-2">
-            <button type="button" onClick={prevStep} className="text-blue-600 underline">
-              Back
-            </button>
-          </div>
-        </div>
+      <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+        <input
+          {...register("firstName")}
+          placeholder="First Name"
+          className="w-full p-3 border rounded text-black text-base"
+        />
+        <input
+          {...register("lastName")}
+          placeholder="Last Name"
+          className="w-full p-3 border rounded text-black text-base"
+        />
+      </div>
+      {errors.firstName && <p className="text-red-500 text-sm mt-2">{errors.firstName.message}</p>}
+      {errors.lastName && <p className="text-red-500 text-sm mt-2">{errors.lastName.message}</p>}
+      <div className="mt-6 flex flex-col space-y-2">
+        <button
+          type="button"
+          onClick={handleSubmit(onNameSubmit)}
+          className="w-full py-3 text-lg font-medium"
+          style={{
+            background: "rgba(229, 57, 53, 0.65)",
+            boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+            backdropFilter: "blur(2.5px)",
+            WebkitBackdropFilter: "blur(2.5px)",
+            borderRadius: "10px",
+            border: "1px solid rgba(255, 255, 255, 0.18)"
+          }}
+        >
+          Proceed
+        </button>
+        <button type="button" onClick={prevStep} className="text-blue-400 underline">
+          Back
+        </button>
       </div>
     </motion.div>
   );
 }
 
 export default function LandingPage() {
-  // Define steps and state variables.
+  // Steps: 0 = Owner selection, 1 = Damage type, 2 = Injury status, 3 = Enter Name, 4 = Summary, 5 = Contact Info.
   const totalSteps = 6;
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [formData, setFormData] = useState<FormData>({
@@ -265,27 +314,25 @@ export default function LandingPage() {
   });
   const [submitted, setSubmitted] = useState<boolean>(false);
 
-  // Log the current formData for debugging.
   useEffect(() => {
     console.log("Current formData:", formData);
   }, [formData]);
 
-  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, totalSteps - 1));
-  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0));
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, totalSteps - 1));
+  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
 
   const handleOptionClick = (field: keyof FormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
     nextStep();
   };
 
-  // Update phone input formatting and enforce max 10 digits.
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     let newValue = value;
     if (name === "phone") {
       newValue = formatPhoneNumber(value);
     }
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: type === "checkbox" ? checked : newValue,
     }));
@@ -311,180 +358,318 @@ export default function LandingPage() {
   };
 
   return (
-    <main className="relative w-full h-screen flex flex-col justify-between bg-transparent overflow-hidden">
-      <AnimatedGradientBackground />
+    <>
+      <style jsx global>{globalStyles}</style>
+      <main className="h-screen flex flex-col bg-transparent overflow-hidden">
+        <AnimatedGradientBackground />
 
-      {currentStep < 3 && (
-        <header className="flex flex-col items-center">
+        {/* Header: Legal Advertisement at top, then logo (if step < 4), then headline */}
+        <header className="w-full px-4 sm:px-6 flex flex-col items-center">
           <p className="attorney-ad">Legal Advertisement</p>
-          <div className="animate-fade-down mt-2 mb-4">
-            <Image src={Logo} alt="Logo" width={100} height={100} className="pulse-logo" />
+          <div className="flex justify-center w-full">
+            {!submitted && currentStep < 4 && (
+              <Image src={Logo} alt="Logo" width={100} height={100} className="pulse-logo" />
+            )}
           </div>
+          <AnimatedHeadline />
         </header>
-      )}
 
-      <section className="flex flex-col items-center flex-grow justify-center px-6 sm:px-12 text-center">
-        <AnimatedHeadline />
-      </section>
-
-      <footer className="w-full flex flex-col items-center mb-12">
-        {!submitted ? (
-          <div className="w-full max-w-md mx-auto glass-container">
-            <div className="mb-4">
-              <div className="h-2 bg-gray-300 rounded-full">
-                <div className="h-full bg-red-600 rounded-full transition-all duration-500" style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }} />
+        {/* Multi-Step Form Section */}
+        <footer className="w-full flex flex-col items-center mb-12 px-4">
+          {!submitted ? (
+            <div
+              className="w-full max-w-2xl mx-auto p-4 sm:p-6"
+              style={{
+                background: "rgba(65, 112, 142, 0.45)",
+                boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
+                backdropFilter: "blur(5.5px)",
+                WebkitBackdropFilter: "blur(5.5px)",
+                borderRadius: "10px",
+                border: "1px solid rgba(255,255,255,0.18)"
+              }}
+            >
+              {/* Progress Bar */}
+              <div className="mb-4">
+                <div className="h-2 bg-gray-300 rounded-full">
+                  <div className="h-full bg-red-600 rounded-full transition-all duration-500" style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }} />
+                </div>
+                <p className="text-right text-sm text-gray-200 mt-1">
+                  Step {currentStep + 1} of {totalSteps}
+                </p>
               </div>
-              <p className="text-right text-sm text-gray-600">
-                Step {currentStep + 1} of {totalSteps}
+              <form onSubmit={handleSubmit} id="multistep-form">
+                <AnimatePresence mode="wait">
+                  {currentStep === 0 && (
+                    <motion.div key="step-1" variants={stepVariants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.5 }} className="form-step">
+                      <h2 className="text-xl font-medium mb-4">What best describes you?</h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button
+                          type="button"
+                          onClick={() => handleOptionClick("ownerType", "Homeowner")}
+                          className="w-full py-3 text-lg font-medium"
+                          style={{
+                            background: "rgba(229, 57, 53, 0.65)",
+                            boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
+                            backdropFilter: "blur(2.5px)",
+                            WebkitBackdropFilter: "blur(2.5px)",
+                            borderRadius: "10px",
+                            border: "1px solid rgba(255,255,255,0.18)"
+                          }}
+                        >
+                          <span className="mr-2">🏠</span>Homeowner
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOptionClick("ownerType", "Renter")}
+                          className="w-full py-3 text-lg font-medium"
+                          style={{
+                            background: "rgba(229, 57, 53, 0.65)",
+                            boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
+                            backdropFilter: "blur(2.5px)",
+                            WebkitBackdropFilter: "blur(2.5px)",
+                            borderRadius: "10px",
+                            border: "1px solid rgba(255,255,255,0.18)"
+                          }}
+                        >
+                          <span className="mr-2">🏢</span>Renter
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOptionClick("ownerType", "Business Owner")}
+                          className="w-full py-3 text-lg font-medium"
+                          style={{
+                            background: "rgba(229, 57, 53, 0.65)",
+                            boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
+                            backdropFilter: "blur(2.5px)",
+                            WebkitBackdropFilter: "blur(2.5px)",
+                            borderRadius: "10px",
+                            border: "1px solid rgba(255,255,255,0.18)"
+                          }}
+                        >
+                          <span className="mr-2">💼</span>Business Owner
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOptionClick("ownerType", "Multifamily Owner")}
+                          className="w-full py-3 text-lg font-medium"
+                          style={{
+                            background: "rgba(229, 57, 53, 0.65)",
+                            boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
+                            backdropFilter: "blur(2.5px)",
+                            WebkitBackdropFilter: "blur(2.5px)",
+                            borderRadius: "10px",
+                            border: "1px solid rgba(255,255,255,0.18)"
+                          }}
+                        >
+                          <span className="mr-2">🏘️</span>Multifamily
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                  {currentStep === 1 && (
+                    <motion.div key="step-2" variants={stepVariants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.5 }} className="form-step">
+                      <h2 className="text-xl font-medium mb-4">What kind of damage?</h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button
+                          type="button"
+                          onClick={() => handleOptionClick("propertyDamage", "property_destroyed")}
+                          className="w-full py-3 text-lg font-medium"
+                          style={{
+                            background: "rgba(229, 57, 53, 0.65)",
+                            boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
+                            backdropFilter: "blur(2.5px)",
+                            WebkitBackdropFilter: "blur(2.5px)",
+                            borderRadius: "10px",
+                            border: "1px solid rgba(255,255,255,0.18)"
+                          }}
+                        >
+                          <span className="mr-2">🔥</span>Lost Home
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOptionClick("propertyDamage", "partial_damaged")}
+                          className="w-full py-3 text-lg font-medium"
+                          style={{
+                            background: "rgba(229, 57, 53, 0.65)",
+                            boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
+                            backdropFilter: "blur(2.5px)",
+                            WebkitBackdropFilter: "blur(2.5px)",
+                            borderRadius: "10px",
+                            border: "1px solid rgba(255,255,255,0.18)"
+                          }}
+                        >
+                          <span className="mr-2">🏚️</span>Partial Damage
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOptionClick("propertyDamage", "smoke_damage")}
+                          className="w-full py-3 text-lg font-medium"
+                          style={{
+                            background: "rgba(229, 57, 53, 0.65)",
+                            boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
+                            backdropFilter: "blur(2.5px)",
+                            WebkitBackdropFilter: "blur(2.5px)",
+                            borderRadius: "10px",
+                            border: "1px solid rgba(255,255,255,0.18)"
+                          }}
+                        >
+                          <span className="mr-2">💨</span>Smoke Damage
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOptionClick("propertyDamage", "evac_only")}
+                          className="w-full py-3 text-lg font-medium"
+                          style={{
+                            background: "rgba(229, 57, 53, 0.65)",
+                            boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
+                            backdropFilter: "blur(2.5px)",
+                            WebkitBackdropFilter: "blur(2.5px)",
+                            borderRadius: "10px",
+                            border: "1px solid rgba(255,255,255,0.18)"
+                          }}
+                        >
+                          <span className="mr-2">🚨</span>Evacuation Only
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                  {currentStep === 2 && (
+                    <motion.div key="step-3" variants={stepVariants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.5 }} className="form-step">
+                      <h2 className="text-xl font-medium mb-4">Were you injured?</h2>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button
+                          type="button"
+                          onClick={() => handleOptionClick("injuredStatus", "injured")}
+                          className="w-full py-3 text-lg font-medium"
+                          style={{
+                            background: "rgba(229, 57, 53, 0.65)",
+                            boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
+                            backdropFilter: "blur(2.5px)",
+                            WebkitBackdropFilter: "blur(2.5px)",
+                            borderRadius: "10px",
+                            border: "1px solid rgba(255,255,255,0.18)"
+                          }}
+                        >
+                          <span className="mr-2">🤕</span>Yes
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleOptionClick("injuredStatus", "not_injured")}
+                          className="w-full py-3 text-lg font-medium"
+                          style={{
+                            background: "rgba(229, 57, 53, 0.65)",
+                            boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
+                            backdropFilter: "blur(2.5px)",
+                            WebkitBackdropFilter: "blur(2.5px)",
+                            borderRadius: "10px",
+                            border: "1px solid rgba(255,255,255,0.18)"
+                          }}
+                        >
+                          <span className="mr-2">🙅‍♂️</span>No
+                        </button>
+                      </div>
+                      <div className="mt-4 text-center">
+                        <button type="button" onClick={prevStep} className="text-blue-400 underline">
+                          Back
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                  {currentStep === 3 && (
+                    <NameStep setFormData={setFormData} nextStep={nextStep} prevStep={prevStep} />
+                  )}
+                  {currentStep === 4 && (
+                    <SummaryStep
+                      formData={{
+                        ...formData,
+                        firstName: formData.firstName.trim(),
+                        lastName: formData.lastName.trim()
+                      }}
+                      onComplete={nextStep}
+                      onBack={prevStep}
+                    />
+                  )}
+                  {currentStep === 5 && (
+                    <motion.div
+                      key="step-6"
+                      variants={stepVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={{ duration: 0.5 }}
+                      className="form-step font-normal"
+                    >
+                      <h2 className="text-xl font-medium mb-4">Continue your claim</h2>
+                      <div className="space-y-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          <input
+                            type="email"
+                            name="email"
+                            placeholder="Email Address"
+                            required
+                            className="w-full sm:w-1/2 p-3 border rounded text-black text-base"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                          />
+                          <input
+                            type="tel"
+                            name="phone"
+                            placeholder="(XXX) XXX-XXXX"
+                            required
+                            className="w-full sm:w-1/2 p-3 border rounded text-black text-base"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="tcpa"
+                            name="tcpaConsent"
+                            checked={formData.tcpaConsent}
+                            onChange={handleInputChange}
+                            className="h-8 w-8"
+                          />
+                          <label htmlFor="tcpa" className="ml-3 text-xs text-gray-400">
+                            By checking this box, I give permission for MTI Firm to contact me via call, email, or text to better service my claim. We do not use autodialers or spam messaging. I understand that my consent is not a requirement or condition of any purchase, and I can opt out at any time by replying STOP.
+                          </label>
+                        </div>
+                      </div>
+                      <div className="mt-4 flex flex-col">
+                        <button
+                          type="submit"
+                          className="py-3 text-lg font-medium w-full sm:min-w-[400px]"
+                          style={{
+                            background: "rgba(229, 57, 53, 0.65)",
+                            boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
+                            backdropFilter: "blur(2.5px)",
+                            WebkitBackdropFilter: "blur(2.5px)",
+                            borderRadius: "10px",
+                            border: "1px solid rgba(255,255,255,0.18)",
+                            padding: "1rem",
+                          }}
+                        >
+                          Submit
+                        </button>
+                        <button type="button" onClick={prevStep} className="mt-2 text-blue-400 underline">
+                          Back
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </form>
+            </div>
+          ) : (
+            <div className="text-center px-4">
+              <h3 className="text-2xl font-bold mb-2">Thank You!</h3>
+              <p className="text-gray-700">
+                A wildfire claims consultant will contact you shortly.
               </p>
             </div>
-            <form onSubmit={handleSubmit} id="multistep-form">
-              <AnimatePresence mode="wait">
-                {currentStep === 0 && (
-                  <motion.div key="step-1" variants={stepVariants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.5 }} className="form-step">
-                    <h2 className="text-xl font-medium mb-4">What best describes you?</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      <button type="button" onClick={() => handleOptionClick("ownerType", "Homeowner")} className="glass-box" style={{ padding: "0.75rem", fontSize: "1rem", fontWeight: "400" }}>
-                        <span className="mr-2">🏠</span>Homeowner
-                      </button>
-                      <button type="button" onClick={() => handleOptionClick("ownerType", "Renter")} className="glass-box" style={{ padding: "0.75rem", fontSize: "1rem", fontWeight: "400" }}>
-                        <span className="mr-2">🏢</span>Renter
-                      </button>
-                      <button type="button" onClick={() => handleOptionClick("ownerType", "Business Owner")} className="glass-box" style={{ padding: "0.75rem", fontSize: "1rem", fontWeight: "400" }}>
-                        <span className="mr-2">💼</span>Business Owner
-                      </button>
-                      <button type="button" onClick={() => handleOptionClick("ownerType", "Multifamily Owner")} className="glass-box" style={{ padding: "0.75rem", fontSize: "1rem", fontWeight: "400" }}>
-                        <span className="mr-2">🏘️</span>Multifamily
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {currentStep === 1 && (
-                  <motion.div key="step-2" variants={stepVariants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.5 }} className="form-step">
-                    <h2 className="text-xl font-medium mb-4">What kind of damage?</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      <button type="button" onClick={() => handleOptionClick("propertyDamage", "property_destroyed")} className="glass-box" style={{ padding: "0.75rem", fontSize: "1rem", fontWeight: "400" }}>
-                        <span className="mr-2">🔥</span>Lost Home
-                      </button>
-                      <button type="button" onClick={() => handleOptionClick("propertyDamage", "partial_damaged")} className="glass-box" style={{ padding: "0.75rem", fontSize: "1rem", fontWeight: "400" }}>
-                        <span className="mr-2">🏚️</span>Partial Damage
-                      </button>
-                      <button type="button" onClick={() => handleOptionClick("propertyDamage", "smoke_damage")} className="glass-box" style={{ padding: "0.75rem", fontSize: "1rem", fontWeight: "400" }}>
-                        <span className="mr-2">💨</span>Smoke Damage
-                      </button>
-                      <button type="button" onClick={() => handleOptionClick("propertyDamage", "evac_only")} className="glass-box" style={{ padding: "0.75rem", fontSize: "1rem", fontWeight: "400" }}>
-                        <span className="mr-2">🚨</span>Evacuation Only
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {currentStep === 2 && (
-                  <motion.div key="step-3" variants={stepVariants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.5 }} className="form-step">
-                    <h2 className="text-xl font-medium mb-4">Were you injured?</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      <button type="button" onClick={() => handleOptionClick("injuredStatus", "injured")} className="glass-box" style={{ padding: "0.75rem", fontSize: "1rem", fontWeight: "400" }}>
-                        <span className="mr-2">🤕</span>Yes
-                      </button>
-                      <button type="button" onClick={() => handleOptionClick("injuredStatus", "not_injured")} className="glass-box" style={{ padding: "0.75rem", fontSize: "1rem", fontWeight: "400" }}>
-                        <span className="mr-2">🙅‍♂️</span>No
-                      </button>
-                    </div>
-                    <div className="mt-4 text-center">
-                      <button type="button" onClick={prevStep} className="text-blue-600 underline">
-                        Back
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {currentStep === 3 && (
-                  <NameStep setFormData={setFormData} nextStep={nextStep} prevStep={prevStep} />
-                )}
-
-                {currentStep === 4 && (
-                  <SummaryStep
-                    formData={{
-                      ...formData,
-                      firstName: formData.firstName.trim(),
-                      lastName: formData.lastName.trim(),
-                    }}
-                    onComplete={nextStep}
-                    onBack={prevStep}
-                  />
-                )}
-
-                {currentStep === 5 && (
-                  <motion.div key="step-6" variants={stepVariants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.5 }} className="form-step font-normal">
-                    <h2 className="text-xl font-medium mb-4">Continue your claim</h2>
-                    <div className="space-y-4">
-                      <div className="flex gap-4">
-                        <input
-                          type="email"
-                          name="email"
-                          placeholder="Email Address"
-                          required
-                          className="w-1/2 p-2 border rounded"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                        />
-                        <input
-                          type="tel"
-                          name="phone"
-                          placeholder="(XXX) XXX-XXXX"
-                          required
-                          className="w-1/2 p-2 border rounded"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="tcpa"
-                          name="tcpaConsent"
-                          checked={formData.tcpaConsent}
-                          onChange={handleInputChange}
-                          className="mr-2"
-                        />
-                        <label htmlFor="tcpa" className="text-sm text-gray-400">
-                          By checking this box, I give permission for MTI Firm to contact me via call, email, or text to better service my claim. We do not use autodialers or spam messaging. I understand that my consent is not a requirement or condition of any purchase, and I can opt out at any time by replying STOP.
-                        </label>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex justify-between">
-                      <button type="button" onClick={prevStep} className="text-blue-600 underline">
-                        Back
-                      </button>
-                      <button
-                        type="submit"
-                        className="glass-box"
-                        style={{
-                          background: "#28a745",
-                          boxShadow: "0 0 10px 2px #28a745",
-                          padding: "0.75rem",
-                          fontSize: "1rem",
-                          fontWeight: "400",
-                        }}
-                      >
-                        Submit
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </form>
-          </div>
-        ) : (
-          <div className="text-center">
-            <h3 className="text-2xl font-bold mb-2">Thank You!</h3>
-            <p className="text-gray-700">
-              A wildfire claims consultant will contact you shortly.
-            </p>
-          </div>
-        )}
-      </footer>
-    </main>
+          )}
+        </footer>
+      </main>
+    </>
   );
 }

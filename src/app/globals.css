@@ -7,7 +7,7 @@
   html, body, #__next {
     margin: 0;
     padding: 0;
-    height: 100%;
+    min-height: 100%;
     background-color: transparent !important;
   }
   body {
@@ -70,14 +70,7 @@
 /* ---------- Utility Styles ---------- */
 @layer utilities {
   .gradient-background {
-    background: linear-gradient(
-      270deg,
-      #1c1c2e,
-      #262633,
-      #303047,
-      #3a3a53,
-      #44445f
-    );
+    background: linear-gradient(270deg, #1c1c2e, #262633, #303047, #3a3a53, #44445f);
     background-size: 800% 800%;
     animation: gradient-animation 18s ease-in-out infinite;
     filter: contrast(1.2);
@@ -174,4 +167,23 @@
   height: auto !important;
   overflow: visible !important;
   box-sizing: content-box;
+}@layer components {
+  /* Additional glass styles */
+  .glass-style-red {
+    background: rgba(229, 57, 53, 0.65);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(2.5px);
+    -webkit-backdrop-filter: blur(2.5px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .glass-style-blue {
+    background: rgba(65, 112, 142, 0.45);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(5.5px);
+    -webkit-backdrop-filter: blur(5.5px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
 }
