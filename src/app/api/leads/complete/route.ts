@@ -1,72 +1,57 @@
 // src/app/api/leads/complete/route.ts
 import { NextResponse } from "next/server";
-import { z } from "zod";
-import { db } from "@/db"; // adjust the path as needed
-import { claims } from "@/schema"; // your schema file
-import fetch from "node-fetch";
 
-// Define the schema for the complete lead payload.
-const LeadCompleteSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email format"),
-  phone: z.string().min(10, "Phone number is too short").regex(/^\d+$/, "Phone must be numeric"),
-  ownerType: z.string().min(1),
-  propertyDamage: z.string().min(1),
-  injuredStatus: z.string().min(1),
-});
-
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    // Parse and validate incoming data.
-    const body = await req.json();
-    const data = await LeadCompleteSchema.parseAsync(body);
+    // Parse the incoming form data.
+    const formData = await request.json();
 
-    // Update the lead in the database (this is an example using Drizzle).
-    // You might need to identify the lead by an ID if updating an existing record.
-    await db.update(claims)
-      .set({ 
-        firstName: data.firstName, 
-        lastName: data.lastName, 
-        email: data.email, 
-        phone: data.phone, 
-        // Optionally, store a generated summary or mark the lead as complete.
-      })
-      .where(/* your condition to match the lead, e.g., id equals something */);
-
-    // Prepare payload for the external webhook (Pipedrive API).
+    // Build the payload using lower_snake_case as required.
     const payload = {
-      offer: "eaton_fire",
-      first_name: data.firstName,
-      last_name: data.lastName,
-      email: data.email,
-      phone: data.phone,
-      description: `Owner: ${data.ownerType}, Damage: ${data.propertyDamage}, Injury: ${data.injuredStatus}`,
-      injured: data.injuredStatus, // assuming single value
-      property_damage: data.propertyDamage, // assuming single value
+      offer: "eaton_fire", // fixed offer per spec
+      email: formData.email,
+      // Remove non-digit characters; here we assume the webhook expects a 10-digit number.
+      phone: formData.phone.replace(/\D/g, "").substring(0, 10),
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      // Use the AI summary if provided as description.
+      description: formData.summary || "",
+      dryrun: "yes", // Optional: for testing purposes
+      // Qualifier fields as arrays.
+      injured: [formData.injuredStatus],
+      property_damage: [formData.propertyDamage],
     };
 
-    // Send POST request to the external webhook.
-    const externalRes = await fetch("https://mtimid.com/panel/api/v1/lead", {
+    // Retrieve the webhook URL and auth token from environment variables.
+    const webhookUrl = process.env.PIPEDRIVE_API_URL;
+    const xAuthToken = process.env.PIPEDRIVE_X_AUTH_TOKEN;
+
+    if (!webhookUrl || !xAuthToken) {
+      throw new Error("Missing environment variables: PIPEDRIVE_API_URL or PIPEDRIVE_X_AUTH_TOKEN");
+    }
+
+    // Forward the payload to the Pipedrive webhook.
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-auth-token": "9isnu8117638x972ol9i",
+        "x-auth-token": xAuthToken,
       },
       body: JSON.stringify(payload),
     });
 
-    const result = await externalRes.json();
-    if (!externalRes.ok) {
-      return NextResponse.json({ error: result.message || "External API error" }, { status: externalRes.status });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Webhook error response:", errorText);
+      return NextResponse.json(
+        { error: "Webhook response not OK", details: errorText },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ message: "Lead submitted successfully", data: result });
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
-    }
-    console.error("Lead submission error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error("Error submitting lead via webhook:", error);
+    return NextResponse.json({ error: "Error submitting lead via webhook" }, { status: 500 });
   }
 }
