@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
+<<<<<<< HEAD
     "target": "ESNext",
     "module": "ESNext",
+=======
+    "target": "es5",
+    "module": "esnext",
+>>>>>>> 9c6f96b (Initial commit)
     "lib": [
       "dom",
       "dom.iterable",
@@ -16,7 +21,11 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
+<<<<<<< HEAD
     "jsx": "preserve", // updated from "preserve"
+=======
+    "jsx": "preserve",
+>>>>>>> 9c6f96b (Initial commit)
     "baseUrl": ".",
     "paths": {
       "~/*": [
@@ -31,13 +40,24 @@
       {
         "name": "next"
       }
+<<<<<<< HEAD
+=======
+    ],
+    "allowSyntheticDefaultImports": true,
+    "types": [
+      "react",
+      "react-dom"
+>>>>>>> 9c6f96b (Initial commit)
     ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+<<<<<<< HEAD
     "svg.d.ts",
+=======
+>>>>>>> 9c6f96b (Initial commit)
     ".next/types/**/*.ts"
   ],
   "exclude": [

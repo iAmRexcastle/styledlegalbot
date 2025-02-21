@@ -12,12 +12,19 @@
   "dependencies": {
     "@ai-sdk/openai": "^0.0.40",
     "@headlessui/react": "^2.2.0",
+<<<<<<< HEAD
+=======
+    "@hookform/resolvers": "^4.1.0",
+>>>>>>> 9c6f96b (Initial commit)
     "@neondatabase/serverless": "^0.10.4",
     "@prisma/client": "^6.3.1",
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-switch": "^1.1.3",
+<<<<<<< HEAD
     "@sentry/nextjs": "^8.55.0",
+=======
+>>>>>>> 9c6f96b (Initial commit)
     "@tailwindcss/postcss": "^4.0.6",
     "@toolhouseai/sdk": "^1.1.5",
     "@tsparticles/engine": "^3.8.1",
@@ -29,6 +36,7 @@
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.3",
+<<<<<<< HEAD
     "framer-motion": "^12.4.3",
     "lucide-react": "^0.424.0",
     "next": "^14.2.24",
@@ -42,6 +50,22 @@
     "tailwindcss-animate": "^1.0.7",
     "tsparticles": "^3.8.1",
     "zod": "^3.24.2"
+=======
+    "framer-motion": "^12.4.7",
+    "lucide-react": "^0.424.0",
+    "next": "^15.1.7",
+    "nextjs-openai": "^7.2.0",
+    "openai": "^4.85.3",
+    "openai-streams": "^6.2.0",
+    "pipedrive": "^24.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.2",
+    "react-tsparticles": "^2.12.2",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
+    "tsparticles": "^3.8.1"
+>>>>>>> 9c6f96b (Initial commit)
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
@@ -54,7 +78,15 @@
     "eslint-config-next": "14.2.5",
     "postcss": "^8.5.2",
     "prisma": "^6.3.1",
+<<<<<<< HEAD
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3"
+=======
+    "sveltekit-superforms": "^2.23.1",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "zod": "^3.24.2"
+>>>>>>> 9c6f96b (Initial commit)
   }
 }

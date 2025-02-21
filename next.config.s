@@ -1,5 +1,9 @@
 import path from 'path';
+<<<<<<< HEAD
 import { withSentryConfig } from '@sentry/nextjs';
+=======
+// (import removed)
+>>>>>>> 9c6f96b (Initial commit)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
