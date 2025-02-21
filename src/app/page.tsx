@@ -9,7 +9,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Logo from "@/app/Logo.svg";
 import AnimatedGradientBackground from "@/app/components/AnimatedGradientBackground";
 
-/* Global styles for pulse and animated gradient headline */
+/* 
+  Global CSS overrides and animations.
+  Make sure Montserrat & Poppins are actually loaded 
+  (e.g., via a <link> to Google Fonts or @import).
+*/
 const globalStyles = `
   @keyframes pulse {
     0% { transform: scale(1); }
@@ -36,7 +40,7 @@ const globalStyles = `
 `;
 
 /**
- * Modal component for legal documents.
+ * Modal component for displaying legal text (TOS & Privacy).
  */
 function Modal({
   isOpen,
@@ -84,38 +88,20 @@ function Modal({
   );
 }
 
-// Legal text constants (insert your full legal text below)
+// Sample TOS & Privacy text
 const TERMS_OF_SERVICE = `
 MTI FIRM Terms of Service
-
-Effective Date: February 20, 2025
-
-1. Introduction
-
-Welcome to MTI FIRM (“Company,” “we,” or “us”). These Terms of Service (“Terms”) govern your access to and use of our Services, which include:
-  • Lead Generation & AI Data Marketing: Collecting, processing, and using data — including sharing or selling such data — to generate leads and market goods and services.
-  • Legal Representation: Acting as your legal counsel and collaborating with other law firms to litigate and adjudicate your claims on a contingency fee basis.
-
-By using our Services, you agree to these Terms in their entirety. If you do not agree to these Terms, please do not use our Services.
-
-... (full text goes here)
+( ... )
 `;
-
 const PRIVACY_POLICY = `
 MTI FIRM Privacy Policy
-
-Effective Date: February 20, 2025
-
-1. Introduction
-
-MTI FIRM (“Company,” “we,” or “us”) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information in connection with our Services.
-
-... (full text goes here)
+( ... )
 `;
 
 /**
- * AnimatedHeadline displays an animated gradient headline (H1) and a white subhead (H2).
- * H1 uses Montserrat 800 (via font-extrabold) and H2 uses Montserrat 600 (via font-semibold).
+ * AnimatedHeadline 
+ * - H1 uses Montserrat 800 
+ * - Subhead (H2) uses Montserrat 700
  */
 function AnimatedHeadline() {
   return (
@@ -123,14 +109,14 @@ function AnimatedHeadline() {
       <h1 className="animated-gradient-headline text-2xl sm:text-3xl font-[Montserrat] font-extrabold leading-tight">
         Your AI Claims Assistant
       </h1>
-      <h2 className="text-white font-[Montserrat] font-semibold text-base sm:text-lg mt-2">
+      <h2 className="text-white font-[Montserrat] font-bold text-base sm:text-lg mt-2">
         Maximize your compensation with our advanced claims tool.
       </h2>
     </div>
   );
 }
 
-/* Define our form data interface */
+/* Define the form data interface */
 export interface FormData {
   ownerType: string;
   propertyDamage: string;
@@ -143,22 +129,22 @@ export interface FormData {
   summary?: string;
 }
 
-/* Animation variants for step transitions */
+/* Framer Motion variants for step transitions */
 const stepVariants = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
   exit: { opacity: 0 },
 };
 
-/* Zod schema for validating the name fields */
+/* Zod schema for name fields */
 const nameSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
 });
 type NameFormData = z.infer<typeof nameSchema>;
 
-/**
- * Helper function to format a phone number as (XXX) XXX-XXXX.
+/** 
+ * Formats phone number as (XXX) XXX-XXXX 
  */
 function formatPhoneNumber(value: string) {
   const digits = value.replace(/\D/g, "").substring(0, 10);
@@ -186,8 +172,10 @@ function formatPhoneNumber(value: string) {
 }
 
 /**
- * SummaryStep simulates an AI-generated summary with dramatic streaming.
- * The "Proceed" button appears 4 seconds after streaming completes.
+ * SummaryStep 
+ * - Streams AI text 
+ * - Has extra right padding (pr-6)
+ * - Delays "Proceed" 4s after streaming
  */
 function SummaryStep({
   formData,
@@ -198,7 +186,7 @@ function SummaryStep({
   onComplete: () => void;
   onBack: () => void;
 }) {
-  const firstNameVal = formData.firstName ? formData.firstName.trim() : "User";
+  const firstNameVal = formData.firstName.trim() || "User";
   const ownerTypeVal = formData.ownerType || "unspecified";
   const propertyDamageVal = formData.propertyDamage
     ? formData.propertyDamage.replace("_", " ")
@@ -227,11 +215,13 @@ function SummaryStep({
   const [loading, setLoading] = useState(true);
   const [showProceed, setShowProceed] = useState(false);
 
+  // Stream word by word
   useEffect(() => {
     const words = prompt.split(" ").filter((w) => w);
     let index = 0;
     setSummary("");
     setLoading(true);
+
     const interval = setInterval(() => {
       if (index < words.length) {
         setSummary((prev) => (prev ? prev + " " + words[index] : words[index]));
@@ -241,17 +231,17 @@ function SummaryStep({
         setLoading(false);
       }
     }, 119);
+
     return () => clearInterval(interval);
   }, [prompt]);
 
-  // Delay "Proceed" button by 4 seconds after streaming completes.
+  // Delay "Proceed" by 4 seconds after streaming completes
   useEffect(() => {
     if (!loading) {
       const timer = setTimeout(() => setShowProceed(true), 4000);
       return () => clearTimeout(timer);
-    } else {
-      setShowProceed(false);
     }
+    setShowProceed(false);
   }, [loading]);
 
   const renderFinalSummary = () => {
@@ -282,7 +272,8 @@ function SummaryStep({
       transition={{ duration: 0.5 }}
       className="form-step font-normal"
     >
-      <div className="mb-4 px-4 py-6 sm:py-8 w-full max-w-5xl mx-auto summary-container text-left flex flex-col justify-center">
+      {/* Extra pr-6 to increase right padding */}
+      <div className="mb-4 px-4 pr-6 py-6 sm:py-8 w-full max-w-5xl mx-auto summary-container text-left flex flex-col justify-center">
         {loading ? (
           <div className="flex flex-col items-center justify-center space-y-4 py-4 mt-8">
             <div className="w-12 h-12 border-4 border-t-transparent border-gray-500 rounded-full animate-spin"></div>
@@ -294,12 +285,13 @@ function SummaryStep({
           renderFinalSummary()
         )}
       </div>
+
       <div className="text-center">
         {showProceed ? (
           <button
             type="button"
             onClick={onComplete}
-            className="w-full py-3 text-lg font-medium sm:min-w-[400px]"
+            className="font-[Poppins] w-full py-3 text-lg font-medium sm:min-w-[400px]"
             style={{
               background: "rgba(229, 57, 53, 0.65)",
               boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -315,7 +307,7 @@ function SummaryStep({
           <button
             type="button"
             disabled
-            className="w-full py-3 text-lg font-medium opacity-50 cursor-not-allowed sm:min-w-[400px]"
+            className="font-[Poppins] w-full py-3 text-lg font-medium opacity-50 cursor-not-allowed sm:min-w-[400px]"
             style={{
               background: "rgba(229, 57, 53, 0.65)",
               boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -328,11 +320,12 @@ function SummaryStep({
             Please wait...
           </button>
         )}
+
         <div className="mt-2">
           <button
             type="button"
             onClick={onBack}
-            className="text-blue-400 underline"
+            className="font-[Poppins] text-blue-400 underline"
           >
             Back
           </button>
@@ -344,7 +337,7 @@ function SummaryStep({
 
 /**
  * NameStep collects the user's first and last name.
- * On desktop, inputs are side by side; on mobile, they stack.
+ * Uses Poppins for the question heading and button text.
  */
 function NameStep({
   setFormData,
@@ -355,7 +348,11 @@ function NameStep({
   nextStep: () => void;
   prevStep: () => void;
 }) {
-  const { register, handleSubmit, formState: { errors } } = useForm<NameFormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<NameFormData>({
     resolver: zodResolver(nameSchema),
     defaultValues: { firstName: "", lastName: "" },
   });
@@ -375,7 +372,9 @@ function NameStep({
       transition={{ duration: 0.5 }}
       className="form-step"
     >
-      <h2 className="text-xl font-medium mb-4">Enter your name</h2>
+      <h2 className="font-[Poppins] text-xl font-medium mb-4">
+        Enter your name
+      </h2>
       <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
         <input
           {...register("firstName")}
@@ -398,7 +397,7 @@ function NameStep({
         <button
           type="button"
           onClick={handleSubmit(onNameSubmit)}
-          className="w-full py-3 text-lg font-medium"
+          className="font-[Poppins] w-full py-3 text-lg font-medium"
           style={{
             background: "rgba(229, 57, 53, 0.65)",
             boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -413,7 +412,7 @@ function NameStep({
         <button
           type="button"
           onClick={prevStep}
-          className="text-blue-400 underline"
+          className="font-[Poppins] text-blue-400 underline"
         >
           Back
         </button>
@@ -423,12 +422,10 @@ function NameStep({
 }
 
 /**
- * Main LandingPage component that manages the multi-step form.
- * The header always displays "Legal Advertisement" at the top, then the logo (visible until step 4),
- * and the animated headline/subhead are always visible.
- * The glass-morphed form submits the lead data (including the answer to "What best describes you?")
- * to the external API (pipedrive) and includes all answers.
- * Footer legal links are rendered below the form.
+ * LandingPage manages the multi-step form and submission to your external API.
+ * - Headline: Montserrat 800, subhead Montserrat 700
+ * - Form question headings & buttons: Poppins
+ * - Right padding in AI summary text container
  */
 export default function LandingPage() {
   const totalSteps = 6;
@@ -444,7 +441,8 @@ export default function LandingPage() {
     tcpaConsent: true,
   });
   const [submitted, setSubmitted] = useState<boolean>(false);
-  // Modal states for legal documents.
+
+  // Modals for TOS & Privacy
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
 
@@ -474,12 +472,12 @@ export default function LandingPage() {
     }));
   };
 
-  // Submit all multi-step form answers to the pipedrive API endpoint.
+  // Submits the multi-step form data to your external API
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
 
-    // Build the payload from all form data.
+    // Example payload mapping
     const payload = {
       offer: "eaton_fire",
       first_name: formData.firstName.trim(),
@@ -489,7 +487,7 @@ export default function LandingPage() {
       description: formData.summary || "",
       injured: [formData.injuredStatus],
       property_damage: [formData.propertyDamage],
-      owner_type: formData.ownerType, // Added field for the first question.
+      owner_type: formData.ownerType,
     };
 
     try {
@@ -517,7 +515,7 @@ export default function LandingPage() {
       <main className="h-screen flex flex-col bg-transparent overflow-hidden">
         <AnimatedGradientBackground />
 
-        {/* Header: Always shows Legal Advertisement at the top; logo (until step 4) above headline */}
+        {/* Header with legal ad, logo (until step 4), and Montserrat headline */}
         <header className="w-full px-4 sm:px-6 flex flex-col items-center">
           <p className="attorney-ad">Legal Advertisement</p>
           <div className="flex justify-center w-full">
@@ -562,8 +560,10 @@ export default function LandingPage() {
                   Step {currentStep + 1} of {totalSteps}
                 </p>
               </div>
+
               <form onSubmit={handleSubmit} id="multistep-form">
                 <AnimatePresence mode="wait">
+                  {/* Step 0: "What best describes you?" */}
                   {currentStep === 0 && (
                     <motion.div
                       key="step-1"
@@ -574,7 +574,7 @@ export default function LandingPage() {
                       transition={{ duration: 0.5 }}
                       className="form-step"
                     >
-                      <h2 className="text-xl font-medium mb-4">
+                      <h2 className="font-[Poppins] text-xl font-medium mb-4">
                         What best describes you?
                       </h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -583,7 +583,7 @@ export default function LandingPage() {
                           onClick={() =>
                             handleOptionClick("ownerType", "Homeowner")
                           }
-                          className="w-full py-3 text-lg font-medium"
+                          className="font-[Poppins] w-full py-3 text-lg font-medium"
                           style={{
                             background: "rgba(229, 57, 53, 0.65)",
                             boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -600,7 +600,7 @@ export default function LandingPage() {
                           onClick={() =>
                             handleOptionClick("ownerType", "Renter")
                           }
-                          className="w-full py-3 text-lg font-medium"
+                          className="font-[Poppins] w-full py-3 text-lg font-medium"
                           style={{
                             background: "rgba(229, 57, 53, 0.65)",
                             boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -617,7 +617,7 @@ export default function LandingPage() {
                           onClick={() =>
                             handleOptionClick("ownerType", "Business Owner")
                           }
-                          className="w-full py-3 text-lg font-medium"
+                          className="font-[Poppins] w-full py-3 text-lg font-medium"
                           style={{
                             background: "rgba(229, 57, 53, 0.65)",
                             boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -634,7 +634,7 @@ export default function LandingPage() {
                           onClick={() =>
                             handleOptionClick("ownerType", "Multifamily Owner")
                           }
-                          className="w-full py-3 text-lg font-medium"
+                          className="font-[Poppins] w-full py-3 text-lg font-medium"
                           style={{
                             background: "rgba(229, 57, 53, 0.65)",
                             boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -650,6 +650,7 @@ export default function LandingPage() {
                     </motion.div>
                   )}
 
+                  {/* Step 1: "What kind of damage?" */}
                   {currentStep === 1 && (
                     <motion.div
                       key="step-2"
@@ -660,16 +661,19 @@ export default function LandingPage() {
                       transition={{ duration: 0.5 }}
                       className="form-step"
                     >
-                      <h2 className="text-xl font-medium mb-4">
+                      <h2 className="font-[Poppins] text-xl font-medium mb-4">
                         What kind of damage?
                       </h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <button
                           type="button"
                           onClick={() =>
-                            handleOptionClick("propertyDamage", "property_destroyed")
+                            handleOptionClick(
+                              "propertyDamage",
+                              "property_destroyed"
+                            )
                           }
-                          className="w-full py-3 text-lg font-medium"
+                          className="font-[Poppins] w-full py-3 text-lg font-medium"
                           style={{
                             background: "rgba(229, 57, 53, 0.65)",
                             boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -684,9 +688,12 @@ export default function LandingPage() {
                         <button
                           type="button"
                           onClick={() =>
-                            handleOptionClick("propertyDamage", "partial_damaged")
+                            handleOptionClick(
+                              "propertyDamage",
+                              "partial_damaged"
+                            )
                           }
-                          className="w-full py-3 text-lg font-medium"
+                          className="font-[Poppins] w-full py-3 text-lg font-medium"
                           style={{
                             background: "rgba(229, 57, 53, 0.65)",
                             boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -703,7 +710,7 @@ export default function LandingPage() {
                           onClick={() =>
                             handleOptionClick("propertyDamage", "smoke_damage")
                           }
-                          className="w-full py-3 text-lg font-medium"
+                          className="font-[Poppins] w-full py-3 text-lg font-medium"
                           style={{
                             background: "rgba(229, 57, 53, 0.65)",
                             boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -720,7 +727,7 @@ export default function LandingPage() {
                           onClick={() =>
                             handleOptionClick("propertyDamage", "evac_only")
                           }
-                          className="w-full py-3 text-lg font-medium"
+                          className="font-[Poppins] w-full py-3 text-lg font-medium"
                           style={{
                             background: "rgba(229, 57, 53, 0.65)",
                             boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -737,7 +744,7 @@ export default function LandingPage() {
                         <button
                           type="button"
                           onClick={prevStep}
-                          className="text-blue-600 underline"
+                          className="font-[Poppins] text-blue-600 underline"
                         >
                           Back
                         </button>
@@ -745,6 +752,7 @@ export default function LandingPage() {
                     </motion.div>
                   )}
 
+                  {/* Step 2: "Were you injured?" */}
                   {currentStep === 2 && (
                     <motion.div
                       key="step-3"
@@ -755,7 +763,7 @@ export default function LandingPage() {
                       transition={{ duration: 0.5 }}
                       className="form-step"
                     >
-                      <h2 className="text-xl font-medium mb-4">
+                      <h2 className="font-[Poppins] text-xl font-medium mb-4">
                         Were you injured?
                       </h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -764,7 +772,7 @@ export default function LandingPage() {
                           onClick={() =>
                             handleOptionClick("injuredStatus", "injured")
                           }
-                          className="w-full py-3 text-lg font-medium"
+                          className="font-[Poppins] w-full py-3 text-lg font-medium"
                           style={{
                             background: "rgba(229, 57, 53, 0.65)",
                             boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -781,7 +789,7 @@ export default function LandingPage() {
                           onClick={() =>
                             handleOptionClick("injuredStatus", "not_injured")
                           }
-                          className="w-full py-3 text-lg font-medium"
+                          className="font-[Poppins] w-full py-3 text-lg font-medium"
                           style={{
                             background: "rgba(229, 57, 53, 0.65)",
                             boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -798,7 +806,7 @@ export default function LandingPage() {
                         <button
                           type="button"
                           onClick={prevStep}
-                          className="text-blue-600 underline"
+                          className="font-[Poppins] text-blue-600 underline"
                         >
                           Back
                         </button>
@@ -806,6 +814,7 @@ export default function LandingPage() {
                     </motion.div>
                   )}
 
+                  {/* Step 3: Name entry */}
                   {currentStep === 3 && (
                     <NameStep
                       setFormData={setFormData}
@@ -814,6 +823,7 @@ export default function LandingPage() {
                     />
                   )}
 
+                  {/* Step 4: AI Summary */}
                   {currentStep === 4 && (
                     <SummaryStep
                       formData={{
@@ -826,6 +836,7 @@ export default function LandingPage() {
                     />
                   )}
 
+                  {/* Step 5: Final contact info + submission */}
                   {currentStep === 5 && (
                     <motion.div
                       key="step-6"
@@ -836,7 +847,7 @@ export default function LandingPage() {
                       transition={{ duration: 0.5 }}
                       className="form-step font-normal"
                     >
-                      <h2 className="text-xl font-medium mb-4">
+                      <h2 className="font-[Poppins] text-xl font-medium mb-4">
                         Continue your claim
                       </h2>
                       <div className="space-y-4">
@@ -880,7 +891,7 @@ export default function LandingPage() {
                       <div className="mt-4 flex flex-col">
                         <button
                           type="submit"
-                          className="py-3 text-lg font-medium w-full sm:min-w-[400px]"
+                          className="font-[Poppins] py-3 text-lg font-medium w-full sm:min-w-[400px]"
                           style={{
                             background: "rgba(229, 57, 53, 0.65)",
                             boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)",
@@ -896,7 +907,7 @@ export default function LandingPage() {
                         <button
                           type="button"
                           onClick={prevStep}
-                          className="mt-2 text-blue-400 underline"
+                          className="font-[Poppins] mt-2 text-blue-400 underline"
                         >
                           Back
                         </button>
@@ -908,7 +919,9 @@ export default function LandingPage() {
             </div>
           ) : (
             <div className="text-center px-4">
-              <h3 className="text-2xl font-bold mb-2">Thank You!</h3>
+              <h3 className="font-[Poppins] text-2xl font-bold mb-2">
+                Thank You!
+              </h3>
               <p className="text-gray-700">
                 A wildfire claims consultant will contact you shortly.
               </p>
@@ -916,17 +929,17 @@ export default function LandingPage() {
           )}
         </footer>
 
-        {/* Legal Links: rendered below the form container */}
+        {/* Legal Links below the form container */}
         {!submitted && (
           <div className="w-full max-w-2xl mx-auto text-center mt-4 pb-4">
             <span
-              className="text-blue-800 underline cursor-pointer mr-4"
+              className="font-[Poppins] text-blue-800 underline cursor-pointer mr-4"
               onClick={() => setShowTerms(true)}
             >
               Terms of Service
             </span>
             <span
-              className="text-blue-800 underline cursor-pointer"
+              className="font-[Poppins] text-blue-800 underline cursor-pointer"
               onClick={() => setShowPrivacy(true)}
             >
               Privacy Policy
@@ -935,7 +948,7 @@ export default function LandingPage() {
         )}
       </main>
 
-      {/* Modal Popups for Legal Documents */}
+      {/* Modals for TOS & Privacy */}
       <Modal
         isOpen={showTerms}
         onClose={() => setShowTerms(false)}
